@@ -1,7 +1,7 @@
 export const agentIds = ['chatbot', 'summarizer', 'tagger'] as const
-export type AgentId = typeof agentIds[number]
+export type AgentId = string
 export type Counts = { tried: number; released: number; rejected: number }
-export type AgentSnapshot = Counts & { id: AgentId; share: number; rate: Counts }
+export type AgentSnapshot = Counts & { id: AgentId; name: string; share: number; rate: Counts }
 export type Snapshot = { t: number; limit: number; agents: AgentSnapshot[]; events: { t: number; level: string; text: string }[] }
 export type Connection = 'connecting' | 'live' | 'data delayed' | 'reconnecting' | 'offline' | 'contract error'
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
@@ -11,10 +11,10 @@ const counts = (value: unknown): value is Counts & Record<string, unknown> => re
 export function parseSnapshot(value: unknown): Snapshot {
   if (!record(value) || !count(value.t) || !count(value.limit) || value.limit === 0 || !Array.isArray(value.agents) || !Array.isArray(value.events)) throw new Error('Invalid scheduler snapshot')
   const agents: AgentSnapshot[] = value.agents.map((agent: unknown) => {
-    if (!record(agent) || !agentIds.includes(agent.id as AgentId) || !counts(agent) || !count(agent.share) || !counts(agent.rate) || agent.tried < agent.released + agent.rejected) throw new Error('Invalid agent counters')
-    return { id: agent.id as AgentId, share: agent.share, tried: agent.tried, released: agent.released, rejected: agent.rejected, rate: agent.rate }
+    if (!record(agent) || typeof agent.id !== 'string' || !agent.id.trim() || !counts(agent) || !count(agent.share) || !counts(agent.rate)) throw new Error('Invalid agent counters')
+    return { id: agent.id as AgentId, name: typeof agent.name === 'string' && agent.name.trim() ? agent.name : String(agent.id), share: agent.share, tried: agent.tried, released: agent.released, rejected: agent.rejected, rate: agent.rate }
   })
-  if (agents.length !== 3 || new Set(agents.map(agent => agent.id)).size !== 3 || agents.reduce((sum, agent) => sum + agent.share, 0) > value.limit) throw new Error('Unexpected agent allocation')
+  if (new Set(agents.map(agent => agent.id)).size !== agents.length) throw new Error('Unexpected agent allocation')
   const events = value.events.map((event: unknown) => {
     if (!record(event) || !count(event.t) || typeof event.text !== 'string' || typeof event.level !== 'string') throw new Error('Invalid scheduler event')
     return { t: event.t, text: event.text, level: event.level }
@@ -22,7 +22,7 @@ export function parseSnapshot(value: unknown): Snapshot {
   return { t: value.t, limit: value.limit, agents, events }
 }
 
-export function waiting(agent: AgentSnapshot) { return agent.tried - agent.released - agent.rejected }
+export function waiting(agent: AgentSnapshot) { return Math.max(0, agent.tried - agent.released - agent.rejected) }
 const configuredBase = (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env?.VITE_STARFLOW_API_URL
 export const apiBase = (configuredBase || '/api').replace(/\/$/, '')
 export function socketUrl() {
@@ -49,8 +49,8 @@ export async function setRogue(on: boolean) {
   return on
 }
 export async function setShares(shares: Record<AgentId, number>, limit: number) {
-  if (agentIds.some(id => !count(shares[id])) || Object.values(shares).reduce((a,b) => a+b, 0) > limit) throw new Error('Shares must be nonnegative integers within capacity')
-  const result = await request(`/shares?${new URLSearchParams(Object.entries(shares).map(([key,value]) => [key,String(value)]))}`, 'POST')
+  if (!Object.keys(shares).length || Object.entries(shares).some(([id,value]) => !id.trim() || id.includes(',') || !count(value)) || Object.values(shares).reduce((a,b) => a+b, 0) > limit) throw new Error('Shares must be nonnegative integers within capacity')
+  const result = await request(`/shares?${new URLSearchParams({ ids: Object.keys(shares).join(','), shares: Object.values(shares).join(',') })}`, 'POST')
   if (result.ok !== true) throw new Error('Share change was not confirmed')
 }
 export async function ask(agent: AgentId, text: string) {
