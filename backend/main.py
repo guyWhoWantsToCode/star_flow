@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 import state
 import scheduler
 import gemini
+import db
 
 @asynccontextmanager
 async def lifespan(app):
@@ -53,3 +54,6 @@ async def set_shares(chatbot: int, summarizer: int, tagger: int):
     state.AGENTS["tagger"]["share"] = tagger
     state.log("info", f"shares set to {chatbot}/{summarizer}/{tagger}")
     return {"ok": True}
+@app.get("/history")
+async def history():
+    return db.history(60)

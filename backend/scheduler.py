@@ -1,5 +1,6 @@
 import asyncio
 import state
+import db
 
 QUEUE_MAX = 20
 queues = {name: asyncio.Queue() for name in state.AGENTS}
@@ -38,4 +39,8 @@ async def run():
                     budget -= 1
 
         state.tick_rates()
+        try:
+            db.write(state.snapshot()["agents"])
+        except Exception:
+            pass
         await asyncio.sleep(1)
