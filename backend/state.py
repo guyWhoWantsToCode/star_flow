@@ -3,6 +3,8 @@ import time
 START = time.time()
 LIMIT = 10
 
+ROGUE = False
+
 AGENTS = {
     "chatbot":  {"share": 5, "tried": 0, "released": 0, "rejected": 0},
     "summarizer": {"share": 3, "tried": 0, "released": 0, "rejected": 0,},
