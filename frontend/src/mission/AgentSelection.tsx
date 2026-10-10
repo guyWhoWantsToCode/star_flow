@@ -1,19 +1,48 @@
 import { AgentIcon } from './AgentIcon'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Brand, OrbitLogo } from '../components/landing/Brand'
-import { agents, agentStyle } from './agents'
-import type { AgentId, Connection } from '../services/starflowApi'
+import { agentStyle } from './agents'
+import { readCatalog, splitAgentShares, type AgentId, type Connection } from '../services/starflowApi'
 export default function AgentSelection({ status, error, initializing, onPower, onRetry, onReset }: {
-  status: Connection; error: string; initializing: boolean; onPower: () => void; onRetry: () => void; onReset: () => void
+  status: Connection; error: string; initializing: boolean; onPower: (ids: AgentId[]) => void; onRetry: () => void; onReset: () => void
 }) {
+  const [catalog, setCatalog] = useState<{id: string; name: string}[]>([])
+  const [catalogError, setCatalogError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
   const [selected, setSelected] = useState<AgentId[]>([])
-  const ready = selected.length === 3
-  return <div className="mission-shell setup-screen"><header className="mission-header"><Brand/><span className="system-status">{initializing ? status === 'live' ? 'STATION INITIALIZING' : status.toUpperCase() : 'SYSTEM STANDBY'}</span></header><main className={`setup-main ${initializing ? 'is-initializing' : ''}`}>
-    <p className="mission-kicker">Station configuration</p><h1 tabIndex={-1}>Every service. One fair system.</h1><p className="setup-description">Select the three AI services sharing your API capacity.<br/>Then bring Mission Control online.</p>
-    <div className="selection-grid">{agents.map((agent, index) => <button key={agent.id} className={`selection-card ${selected.includes(agent.id) ? 'is-selected' : ''}`} style={{ ...agentStyle(agent.id), animationDelay: `${index * 180}ms` }} aria-pressed={selected.includes(agent.id)} disabled={initializing} onClick={() => setSelected(current => current.includes(agent.id) ? current.filter(id => id !== agent.id) : [...current, agent.id])}><span className="selection-card-top"><span className="agent-icon"><AgentIcon id={agent.id}/></span><span className="selection-check">{selected.includes(agent.id) ? '✓' : '+'}</span></span><strong>{agent.name}</strong><span>{agent.description}</span><small>{selected.includes(agent.id) ? 'Selected for mission' : 'Select service'}</small></button>)}</div>
-    <div className="power-area"><p aria-live="polite">{selected.length} <span>/ 3 services selected</span></p><button className="power-button" disabled={!ready || initializing} onClick={() => { if (ready && !initializing) onPower() }} aria-label="Power on Mission Control"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 4v12m-7-9a12 12 0 1 0 14 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg></button><strong>{initializing ? 'Connecting to Mission Control' : ready ? 'Power on' : 'Select all three services'}</strong><span>{initializing ? 'Activating the existing backend session' : ready ? 'All systems ready' : 'Each service needs a protected share'}</span></div>
+  useEffect(() => {
+    const abort = new AbortController()
+    async function load() {
+      setLoading(true); setCatalogError('')
+      try {
+        const result = await readCatalog(abort.signal)
+        if (!abort.signal.aborted) {
+          setCatalog(result)
+          setSelected(current => ['chatbot', ...current.filter(id => id !== 'chatbot' && result.some(agent => agent.id === id))].filter(id => result.some(agent => agent.id === id)).slice(0, 4))
+        }
+      } catch (failure) {
+        if (!abort.signal.aborted) setCatalogError(failure instanceof Error ? failure.message : 'Cannot load the agent catalog')
+      } finally { if (!abort.signal.aborted) setLoading(false) }
+    }
+    void load()
+    return () => abort.abort()
+  }, [attempt])
+  const ready = !loading && !catalogError && selected.length >= 3 && selected.length <= 4 && selected.includes('chatbot')
+  const shares = ready ? splitAgentShares(selected) : []
+  return <div className="mission-shell setup-screen"><header className="mission-header"><Brand/><span className="system-status">{initializing ? status === 'live' ? 'STATION INITIALIZING' : 'STATION CONNECTING' : 'SYSTEM STANDBY'}</span></header><main className={`setup-main ${initializing ? 'is-initializing' : ''}`}>
+    <p className="mission-kicker">Station configuration</p><h1 tabIndex={-1}>Your agents. One fair system.</h1><p className="setup-description">Choose 3–4 services from the live catalog, including Customer chatbot.<br/>We’ll divide 10 requests per second as evenly as possible.</p>
+    <div className="catalog-toolbar"><span>{loading ? 'Loading agent catalog…' : `${catalog.length} services available`}</span><span aria-live="polite">{selected.length} / 4 selected · minimum 3</span></div>
+    {catalogError && <div className="connection-error" role="alert"><p>{catalogError}</p><button className="mission-button" onClick={() => setAttempt(value => value + 1)}>Reload catalog</button></div>}
+    {!loading && !catalogError && !catalog.some(agent => agent.id === 'chatbot') && <p className="inline-error" role="alert">Chatbot is unavailable in the catalog. Refresh the catalog before starting.</p>}
+    <div className="selection-grid catalog-grid" aria-label="Available agents" aria-busy={loading}>{catalog.map((agent, index) => {
+      const chosen = selected.includes(agent.id)
+      const required = agent.id === 'chatbot'
+      return <button key={agent.id} className={`selection-card ${chosen ? 'is-selected' : ''}`} style={{ ...agentStyle(agent.id), animationDelay: `${Math.min(index,3) * 180}ms` }} aria-pressed={chosen} disabled={initializing || required || (!chosen && selected.length >= 4)} onClick={() => setSelected(current => current.includes(agent.id) ? current.filter(id => id !== agent.id) : current.length < 4 ? [...current, agent.id] : current)}><span className="selection-card-top"><span className="agent-icon"><AgentIcon id={['chatbot','summarizer','tagger'].includes(agent.id) ? agent.id : 'summarizer'}/></span><span className="selection-check">{chosen ? '✓' : '+'}</span></span><strong>{agent.name}</strong><span className="catalog-agent-id">{agent.id}</span><small>{required ? 'Required · included' : chosen ? 'Selected for mission' : selected.length >= 4 ? 'Selection limit reached' : 'Select service'}</small></button>
+    })}</div>
+    <div className="catalog-start"><div><strong>{initializing ? 'Configuring your station…' : ready ? 'Ready for your mission' : 'Choose at least two more services'}</strong><p>{ready ? selected.map((id,index) => `${catalog.find(agent => agent.id === id)?.name ?? id}: ${shares[index]}/s`).join(' · ') : 'Chatbot stays selected. Add up to three other services.'}</p></div><button className="mission-button primary" disabled={!ready || initializing} onClick={() => { if (ready && !initializing) onPower([...selected]) }}>{initializing ? 'Connecting…' : 'Get Started'}<span aria-hidden="true">↗</span></button></div>
     {initializing && <div className="activation-symbol"><OrbitLogo/><span>Scheduler connection</span><button className="mission-text-button" onClick={onReset}>Cancel connection</button></div>}
-    {initializing && (error || status === 'offline' || status === 'contract error') && <div className="connection-error" role="alert"><p>{error || 'Mission Control is unavailable.'}</p><div><button className="mission-button" onClick={onRetry}>Retry connection</button><button className="mission-button quiet" onClick={onReset}>Return to setup</button></div></div>}
-    <p className="setup-note">Selection prepares this interface. The backend runs all three services independently.</p><a href="/" className="text-link">← Return to overview</a>
+    {initializing && (error || status === 'contract error') && <div className="connection-error" role="alert"><p>{error || 'Mission Control is unavailable.'}</p><div><button className="mission-button" onClick={onRetry}>Retry connection</button><button className="mission-button quiet" onClick={onReset}>Return to setup</button></div></div>}
+    <p className="setup-note">Shares protect request capacity. Gemini generates each selected service’s response.</p><a href="/" className="text-link">← Return to overview</a>
   </main></div>
 }

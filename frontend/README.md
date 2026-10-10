@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-The landing page is `/`. Launch Mission runs the shared travel transition to `/setup`. Select all three services to activate the interface; it reaches `/dashboard` only after receiving a valid live scheduler snapshot. Direct dashboard visits connect immediately. Production hosting must serve `index.html` for `/setup` and `/dashboard`.
+The landing page is `/`. Launch Mission runs the shared travel transition to `/setup`. Choose 3–4 services from the full backend catalog, with Chatbot included. Get Started configures `/agents` with evenly divided request shares; `/dashboard` opens only after confirmation and a matching live scheduler snapshot. Direct dashboard visits connect immediately. Production hosting must serve `index.html` for `/setup` and `/dashboard`.
 
 HTTP requests default to `https://starflow-production-7ca6.up.railway.app` and WebSockets use `wss://starflow-production-7ca6.up.railway.app/ws` in development and production. Vite also proxies `/api` to the same backend if explicitly selected via `VITE_STARFLOW_API_URL=/api`. No backend process is started by this frontend. Override `VITE_STARFLOW_API_URL` only when intentionally using a different deployment. See [MISSION_INTEGRATION.md](./MISSION_INTEGRATION.md) for endpoint mappings and validation.
 

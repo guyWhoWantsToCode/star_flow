@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react
 import LandingPage from '../components/landing/LandingPage'
 import GalaxyBackground from '../components/landing/GalaxyBackground'
 import LunarOrbits from '../components/landing/LunarOrbits'
+import { configureAgents, type AgentId } from '../services/starflowApi'
 import { useStarFlow } from '../hooks/useStarFlow'
 import { MissionNavigation } from './navigation'
 import SpaceTravel from './SpaceTravel'
@@ -15,6 +16,9 @@ export default function MissionApp() {
   const [active, setActive] = useState(() => route() === 'dashboard')
   const [setupKey, setSetupKey] = useState(0)
   const [activationReady, setActivationReady] = useState(false)
+  const [configurationError, setConfigurationError] = useState('')
+  const selectedIds = useRef<AgentId[]>([])
+  const configurationGeneration = useRef(0)
   const launchLock = useRef(false)
   const powerLock = useRef(false)
   const activationTimer = useRef(0)
@@ -26,6 +30,7 @@ export default function MissionApp() {
   }, [])
   useEffect(() => {
     const handleBack = () => {
+      configurationGeneration.current++
       clearTimeout(activationTimer.current)
       launchLock.current = false; powerLock.current = false
       setSetupKey(value => value + 1)
@@ -37,8 +42,8 @@ export default function MissionApp() {
   useEffect(() => {
     // Synchronize with the external scheduler / navigation state.
     // eslint-disable-next-line react/set-state-in-effect
-    if (phase === 'initializing' && activationReady && connection.status === 'live') navigate('/dashboard','dashboard')
-  }, [phase, activationReady, connection.status, navigate])
+    if (phase === 'initializing' && activationReady && connection.status === 'live' && connection.snapshot?.agents.length === selectedIds.current.length && selectedIds.current.every(id => connection.snapshot?.agents.some(agent => agent.id === id))) navigate('/dashboard','dashboard')
+  }, [phase, activationReady, connection.status, connection.snapshot, navigate])
   useEffect(() => {
     if (phase === 'launching') return
     const frame = requestAnimationFrame(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))
@@ -52,17 +57,31 @@ export default function MissionApp() {
     setPhase('launching')
   }, [])
   const arrive = useCallback(() => { launchLock.current = false; navigate('/setup','setup') }, [navigate])
-  function powerOn() {
+  async function powerOn(ids: AgentId[]) {
     if (powerLock.current) return
     powerLock.current = true
-    setPhase('initializing'); setActive(true); setActivationReady(false)
-    activationTimer.current = window.setTimeout(() => setActivationReady(true), matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 1500)
+    selectedIds.current = ids
+    const generation = ++configurationGeneration.current
+    setConfigurationError(''); setPhase('initializing'); setActive(false); setActivationReady(false)
+    try {
+      await configureAgents(ids)
+      if (generation !== configurationGeneration.current) return
+      setActive(true)
+      activationTimer.current = window.setTimeout(() => setActivationReady(true), matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 1500)
+    } catch (failure) {
+      if (generation === configurationGeneration.current) setConfigurationError(failure instanceof Error ? failure.message : 'Agent configuration failed')
+    }
+  }
+  function retrySetup() {
+    if (configurationError) { powerLock.current = false; void powerOn(selectedIds.current) }
+    else connection.retry()
   }
   function resetSetup() {
+    configurationGeneration.current++; setConfigurationError('')
     clearTimeout(activationTimer.current)
     powerLock.current = false; setActive(false); setActivationReady(false)
     setSetupKey(value => value + 1)
     navigate('/setup','setup')
   }
-  return <MissionNavigation.Provider value={launch}><GalaxyBackground/><LunarOrbits mission={phase !== 'landing' && phase !== 'launching'}/>{phase === 'landing' || phase === 'launching' ? <div className={phase === 'launching' ? 'landing-launching' : ''}><LandingPage/></div> : phase === 'setup' || phase === 'initializing' ? <AgentSelection key={setupKey} status={connection.status} error={connection.error} initializing={phase === 'initializing'} onPower={powerOn} onRetry={connection.retry} onReset={resetSetup}/> : <MissionControl connection={connection} onSetup={resetSetup}/>} {phase === 'launching' && <SpaceTravel onComplete={arrive}/>}</MissionNavigation.Provider>
+  return <MissionNavigation.Provider value={launch}><GalaxyBackground/><LunarOrbits mission={phase !== 'landing' && phase !== 'launching'}/>{phase === 'landing' || phase === 'launching' ? <div className={phase === 'launching' ? 'landing-launching' : ''}><LandingPage/></div> : phase === 'setup' || phase === 'initializing' ? <AgentSelection key={setupKey} status={connection.status} error={configurationError || (active ? connection.error : '')} initializing={phase === 'initializing'} onPower={powerOn} onRetry={retrySetup} onReset={resetSetup}/> : <MissionControl connection={connection} onSetup={resetSetup}/>} {phase === 'launching' && <SpaceTravel onComplete={arrive}/>}</MissionNavigation.Provider>
 }

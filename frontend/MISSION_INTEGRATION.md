@@ -12,7 +12,7 @@ The frontend uses the existing backend without modifying or starting it. Vite pr
 | Prompt | GET `/ask?agent=…&text=…&real=true`, rendering the actual answer or backend error |
 | Activity | `events` from scheduler snapshots; no invented client activity |
 
-Launch Mission is a shared 3.1-second travel animation. Setup enables power only after selecting Chatbot, Summarizer, and Tagger. Activation takes 1.5 seconds and navigation requires a valid live snapshot. Neither selection nor activation starts or stops backend agents: the backend has no session lifecycle endpoint. Reduced motion shortens both transitions and removes moving request particles.
+Launch Mission is a shared 3.1-second travel animation. Setup loads the complete catalog from GET `/catalog`, includes Chatbot, and requires 3–4 selected services. Get Started sends POST `/agents?ids=…&shares=…` with a near-even integer split of ten requests per second. Activation takes 1.5 seconds after backend confirmation; navigation also requires a live snapshot matching all selected IDs. Configuration failures retain selection and offer retry. Shares schedule requests, not Gemini output tokens. Reduced motion shortens both transitions and removes moving request particles.
 
 A scheduler release is permission to call Gemini, not confirmation that generation has completed. Response times measure the complete HTTP round trip. Rogue mode needs the backend's existing simulator to produce additional traffic. The frontend does not generate background traffic.
 

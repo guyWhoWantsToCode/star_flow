@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { agents, agentColor } from './agents'
 import { type AgentId, type Snapshot } from '../services/starflowApi'
-const paths: Record<AgentId, string> = { chatbot: 'M285 130 C380 130 370 205 445 205', summarizer: 'M915 130 C820 130 830 205 755 205', tagger: 'M285 340 C360 340 373 283 445 283' }
+const paths = [
+  'M285 130 C380 130 370 205 445 205',
+  'M915 130 C820 130 830 205 755 205',
+  'M285 340 C360 340 373 283 445 283',
+  'M915 340 C840 340 827 283 755 283',
+]
+
 type Particle = { key: string; id: AgentId; expires: number; delay: number; path: string }
 function RequestParticle({ particle }: { particle: Particle }) {
   const circle = useRef<SVGCircleElement>(null)
@@ -28,7 +34,7 @@ export default function RequestPaths({ snapshot, live }: { snapshot: Snapshot | 
     for (const agent of snapshot.agents) {
       const last = before.agents.find(item => item.id === agent.id)
       const indexInSnapshot = snapshot.agents.findIndex(item => item.id === agent.id)
-      const path = indexInSnapshot < 3 ? paths[agents[indexInSnapshot].id] : undefined
+      const path = paths[indexInSnapshot]
       if (!last || !path) continue
       const delta = Math.max(0, agent.released - last.released)
       for (let index = 0; index < Math.min(delta, 6); index++) incoming.push({ key: `${agent.id}-${serial.current++}`, id: agent.id, expires: Date.now() + 1800 + index * 110, delay: index * 110, path })
@@ -38,5 +44,5 @@ export default function RequestPaths({ snapshot, live }: { snapshot: Snapshot | 
     setParticles(current => [...current.filter(item => item.expires > Date.now()), ...incoming].slice(-36))
   }, [snapshot, live])
   useEffect(() => { const interval = setInterval(() => setParticles(current => current.some(item => item.expires <= Date.now()) ? current.filter(item => item.expires > Date.now()) : current), 400); return () => clearInterval(interval) }, [])
-  return <svg className="request-paths" viewBox="0 0 1200 460" preserveAspectRatio="none" aria-hidden="true">{(snapshot?.agents ?? agents).slice(0,3).map((agent,index) => <g key={agent.id}><path d={paths[agents[index].id]} stroke="#152a40" strokeWidth="8" fill="none"/><path d={paths[agents[index].id]} stroke={agentColor(agent.id)} strokeOpacity={live ? '.55' : '.18'} strokeWidth="1.8" fill="none"/></g>)}{particles.map(particle => <RequestParticle key={particle.key} particle={particle}/>)}</svg>
+  return <svg className="request-paths" viewBox="0 0 1200 460" preserveAspectRatio="none" aria-hidden="true">{(snapshot?.agents ?? agents).slice(0,4).map((agent,index) => <g key={agent.id}><path d={paths[index]} stroke="#152a40" strokeWidth="8" fill="none"/><path d={paths[index]} stroke={agentColor(agent.id)} strokeOpacity={live ? '.55' : '.18'} strokeWidth="1.8" fill="none"/></g>)}{particles.map(particle => <RequestParticle key={particle.key} particle={particle}/>)}</svg>
 }

@@ -55,3 +55,36 @@ test('sends dynamic shares in matching comma-separated ID and value order', asyn
     assert.equal(url.searchParams.get('shares'), '5,3')
   } finally { globalThis.fetch = originalFetch }
 })
+
+test('configuration requires chatbot and 3–4 distinct agents', async () => {
+  const { splitAgentShares } = await import('../src/services/starflowApi.ts')
+  assert.deepEqual(splitAgentShares(['chatbot','invoice','fraud']), [4,3,3])
+  assert.deepEqual(splitAgentShares(['chatbot','invoice','fraud','review']), [3,3,2,2])
+  for (const ids of [['invoice','fraud','review'],['chatbot','invoice'],['chatbot','invoice','invoice'],['chatbot','invoice','fraud','review','notes']]) assert.throws(() => splitAgentShares(ids))
+})
+test('reads all catalog entries and submits selected agents with even shares', async () => {
+  const { readCatalog, configureAgents } = await import('../src/services/starflowApi.ts')
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async (url, options) => {
+    const parsed = new URL(String(url))
+    if (parsed.pathname === '/catalog') return Response.json({ chatbot: 'Customer chatbot', invoice: 'Invoice parser', fraud: 'Fraud screener', review: 'Code reviewer' })
+    assert.equal(parsed.pathname, '/agents')
+    assert.equal(options?.method, 'POST')
+    assert.equal(parsed.searchParams.get('ids'), 'chatbot,invoice,fraud,review')
+    assert.equal(parsed.searchParams.get('shares'), '3,3,2,2')
+    return Response.json({ ok: true })
+  }
+  try {
+    const catalog = await readCatalog()
+    assert.equal(catalog.length, 4)
+    assert.equal(catalog[1].name, 'Invoice parser')
+    await configureAgents(catalog.map(agent => agent.id))
+  } finally { globalThis.fetch = originalFetch }
+})
+test('configuration surfaces backend rejections', async () => {
+  const { configureAgents } = await import('../src/services/starflowApi.ts')
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async () => Response.json({ ok: false, error: 'configuration rejected' })
+  try { await assert.rejects(configureAgents(['chatbot','invoice','fraud']), /configuration rejected/) }
+  finally { globalThis.fetch = originalFetch }
+})

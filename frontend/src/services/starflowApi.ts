@@ -43,6 +43,25 @@ export async function readRogue(signal?: AbortSignal) {
   if (typeof result.rogue !== 'boolean') throw new Error('Invalid rogue state')
   return result.rogue
 }
+export async function readCatalog(signal?: AbortSignal) {
+  const result = await request('/catalog', 'GET', signal)
+  return Object.entries(result).map(([id, name]) => {
+    if (!id.trim() || id.includes(',') || typeof name !== 'string' || !name.trim()) throw new Error('Invalid agent catalog')
+    return { id, name }
+  })
+}
+export function splitAgentShares(ids: string[], limit = 10) {
+  if (ids.length < 3 || ids.length > 4 || !ids.includes('chatbot') || new Set(ids).size !== ids.length || ids.some(id => !id.trim() || id.includes(','))) throw new Error('Choose 3–4 agents including Chatbot')
+  if (!count(limit) || limit < ids.length) throw new Error('Insufficient scheduler capacity')
+  const base = Math.floor(limit / ids.length)
+  const remainder = limit % ids.length
+  return ids.map((_, index) => base + (index < remainder ? 1 : 0))
+}
+export async function configureAgents(ids: string[]) {
+  const shares = splitAgentShares(ids)
+  const result = await request(`/agents?${new URLSearchParams({ ids: ids.join(','), shares: shares.join(',') })}`, 'POST')
+  if (result.ok !== true) throw new Error('Agent configuration was not confirmed')
+}
 export async function setRogue(on: boolean) {
   const result = await request(`/rogue?on=${on}`, 'POST')
   if (result.rogue !== on) throw new Error('Rogue change was not confirmed')
