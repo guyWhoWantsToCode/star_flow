@@ -1,0 +1,5 @@
+import GalaxyBackground from './GalaxyBackground'
+import { LaunchButton } from './Brand'
+export default function HeroSection() {
+  return <section className="hero" id="overview"><GalaxyBackground/><div className="container hero-inner"><div className="hero-copy"><p className="eyebrow"><span className="label-line"/>AI infrastructure / Fair-share scheduling</p><h1>One API.<br/>Multiple Agents.<br/><span>Fair Access.</span></h1><p className="hero-description">When multiple AI agents share the same API, one overloaded service shouldn’t slow down the rest. StarFlow manages requests fairly, protects each agent’s access, and keeps your system running smoothly.</p><div className="hero-actions"><LaunchButton/><a className="text-link" href="#how-it-works">Explore the System <span aria-hidden="true">↓</span></a></div></div><div className="hero-bottom"><span>Shared capacity. Protected access.</span><a href="#how-it-works" aria-label="Scroll to how StarFlow works">Scroll to explore <span aria-hidden="true">↓</span></a></div></div></section>
+}
