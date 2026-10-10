@@ -1,0 +1,2 @@
+import { OrbitLogo, LaunchButton } from './Brand'
+export default function FinalCTA() { return <section className="final-cta container"><div className="cta-orbit" aria-hidden="true"/><OrbitLogo/><h2>Ready to take control<br/>of the flow?</h2><p>Choose your AI services, simulate traffic, and see how<br className="desktop-break"/> StarFlow keeps shared API access fair.</p><LaunchButton/><span className="cta-caption">Your next stop: Mission Control</span></section> }

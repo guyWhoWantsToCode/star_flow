@@ -1,0 +1,14 @@
+import { OrbitLogo } from './Brand'
+type ServiceKind = 'chat' | 'translate' | 'document' | 'code'
+function ServiceIcon({ kind }: { kind: ServiceKind }) {
+  const paths = {
+    chat: <><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></>,
+    translate: <><path d="M3 5h12M9 3v2M6 5c1 6 5 9 8 10M12 5c-1 6-5 9-8 10M14 20l4-10 4 10M16 16h4"/></>,
+    document: <><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h4M9 12h6M9 16h6"/></>,
+    code: <><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 4l-4 16"/></>,
+  }
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[kind]}</svg>
+}
+export default function SystemVisualization() {
+  return <section className="section container" id="how-it-works"><div className="section-heading"><p className="section-index">01 <span>THE SYSTEM</span></p><h2>One shared API.<br/>A fairer way to use it.</h2><p>StarFlow sits between your AI services and Gemini, managing requests before they reach the API.</p></div><div className="system-panel"><div className="panel-top"><span>Request architecture</span><span className="illustration-label"><span/>Illustrative flow</span></div><div className="flow-diagram" role="img" aria-label="Chatbot, Translator, Summarizer and Coding Assistant send requests through the deterministic StarFlow scheduler to the Gemini API."><div className="services">{([['Chatbot','chat'],['Translator','translate'],['Summarizer','document'],['Coding Assistant','code']] as const).map(([label, kind]) => <div className="service" key={kind}><ServiceIcon kind={kind}/><span>{label}</span><i/></div>)}</div><div className="flow-merge" aria-hidden="true"><svg viewBox="0 0 200 300" preserveAspectRatio="none">{[36,112,188,264].map((y,i) => <g key={y}><path d={`M0 ${y} H65 Q100 ${y} 100 ${y < 150 ? y + 35 : y - 35} V150 H200`}/><circle r="2.5" className={`request request-${i}`}><animateMotion dur={`${5+i*.7}s`} repeatCount="indefinite" path={`M0 ${y} H65 Q100 ${y} 100 ${y < 150 ? y + 35 : y - 35} V150 H200`}/></circle></g>)}</svg></div><div className="scheduler"><OrbitLogo/><strong>StarFlow</strong><span>Fair-share scheduler</span><div className="scheduler-rule">Deterministic by design</div></div><div className="flow-output" aria-hidden="true"><span/><i/></div><div className="destination"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2C16 10 22 16 30 16C22 16 16 22 16 30C16 22 10 16 2 16C10 16 16 10 16 2Z" fill="currentColor"/></svg><strong>Gemini</strong><span>Shared API</span></div></div><div className="panel-bottom"><span>Four services. One controlled flow.</span><span>Requests scheduled before generation <span aria-hidden="true">↗</span></span></div></div><p className="system-note">StarFlow controls when requests are released. Gemini generates the responses.</p></section>
+}
