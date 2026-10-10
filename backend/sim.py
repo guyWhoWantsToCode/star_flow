@@ -1,6 +1,5 @@
 import asyncio, httpx
 
-RATES = {"chatbot": 3, "summarizer": 2, "tagger": 2}
 ROGUE_RATE = 20
 
 async def fire(client, name, sem):
@@ -10,24 +9,26 @@ async def fire(client, name, sem):
         except Exception:
             pass
 
-async def agent_loop(name):
-    sem = asyncio.Semaphore(40)
-    limits = httpx.Limits(max_connections=60)
+async def main():
+    sem = asyncio.Semaphore(60)
+    limits = httpx.Limits(max_connections=120)
     async with httpx.AsyncClient(timeout=10, limits=limits) as client:
         while True:
-            rogue = False
             try:
-                r = await client.get("http://localhost:8000/rogue")
-                rogue = r.json()["rogue"]
+                snap = (await client.get("http://localhost:8000/snapshot")).json()
+                rogue = (await client.get("http://localhost:8000/rogue")).json()["rogue"]
             except Exception:
-                pass
+                await asyncio.sleep(1)
+                continue
 
-            rate = ROGUE_RATE if (name == "tagger" and rogue) else RATES[name]
-            for _ in range(rate):
-                asyncio.create_task(fire(client, name, sem))
+            agents = snap["agents"]
+            last = agents[-1]["id"]
+
+            for a in agents:
+                rate = ROGUE_RATE if (a["id"] == last and rogue) else a["share"]
+                for _ in range(rate):
+                    asyncio.create_task(fire(client, a["id"], sem))
+
             await asyncio.sleep(1)
-
-async def main():
-    await asyncio.gather(*[agent_loop(n) for n in RATES])
 
 asyncio.run(main())
