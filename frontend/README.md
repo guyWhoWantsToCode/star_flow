@@ -9,7 +9,9 @@ npm install
 npm run dev
 ```
 
-The landing page is `/`. Every Launch Mission link points to `/dashboard`, which is intentionally a clearly labeled placeholder. For production hosting, configure the server to serve `index.html` for `/dashboard` as well as `/`.
+The landing page is `/`. Launch Mission runs the shared travel transition to `/setup`. Select all three services to activate the interface; it reaches `/dashboard` only after receiving a valid live scheduler snapshot. Direct dashboard visits connect immediately. Production hosting must serve `index.html` for `/setup` and `/dashboard`.
+
+Development HTTP and WebSocket requests go through the Vite `/api` proxy to the supplied laptop backend at `https://theorem-sensor-singing-sydney.trycloudflare.com`. No backend process is started by this frontend. Production needs an equivalent HTTP/WebSocket reverse proxy, or set `VITE_STARFLOW_API_URL` to an accessible API base URL before building. An HTTPS page requires an HTTPS/WSS backend. See [MISSION_INTEGRATION.md](./MISSION_INTEGRATION.md) for endpoint mappings and validation.
 
 ```sh
 npm run typecheck

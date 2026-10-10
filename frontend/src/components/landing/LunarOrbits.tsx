@@ -52,7 +52,7 @@ function makeWorld(kind: World) {
   return canvas
 }
 
-function LunarOrbits() {
+function LunarOrbits({ mission = false }: { mission?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     const canvas = canvasRef.current!
@@ -146,7 +146,7 @@ function LunarOrbits() {
       motion.removeEventListener('change', update)
     }
   }, [])
-  return <div className="lunar-orbits" aria-hidden="true"><canvas ref={canvasRef} /></div>
+  return <div className={`lunar-orbits${mission ? ' lunar-orbits-mission' : ''}`} aria-hidden="true"><canvas ref={canvasRef} /></div>
 }
 
 export default memo(LunarOrbits)
