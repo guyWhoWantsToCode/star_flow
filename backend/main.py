@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import state
 import scheduler
+import gemini
 
 @asynccontextmanager
 async def lifespan(app):
@@ -22,9 +23,15 @@ async def ws(sock: WebSocket):
         await asyncio.sleep(0.5)
 
 @app.get("/ask")
-async def ask(agent: str):
+async def ask(agent: str, text: str = "hello"):
     try:
         await scheduler.submit(agent)
-        return {"ok": True}
     except RuntimeError as e:
         return {"ok": False, "error": str(e)}
+    answer = await gemini.ask(agent, text)
+    return {"ok": True, "answer": answer}
+@app.post("/rogue")
+async def set_rogue(on: bool):
+    state.ROGUE = on
+    state.log("warn" if on else "info", f"tagger rogue {'ON' if on else 'OFF'}")
+    return {"rogue": on}
