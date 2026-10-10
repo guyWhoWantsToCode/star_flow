@@ -50,7 +50,7 @@ test('sends dynamic shares in matching comma-separated ID and value order', asyn
   }
   try {
     await setShares({ chatbot: 5, invoice: 3 }, 10)
-    const url = new URL(captured, 'http://localhost')
+    const url = new URL(captured)
     assert.equal(url.searchParams.get('ids'), 'chatbot,invoice')
     assert.equal(url.searchParams.get('shares'), '5,3')
   } finally { globalThis.fetch = originalFetch }
@@ -87,4 +87,10 @@ test('configuration surfaces backend rejections', async () => {
   globalThis.fetch = async () => Response.json({ ok: false, error: 'configuration rejected' })
   try { await assert.rejects(configureAgents(['chatbot','invoice','fraud']), /configuration rejected/) }
   finally { globalThis.fetch = originalFetch }
+})
+
+test('HTTP and WebSocket endpoints are always the secure Railway deployment', async () => {
+  const { apiBase, socketUrl } = await import('../src/services/starflowApi.ts')
+  assert.equal(apiBase, 'https://starflow-production-7ca6.up.railway.app')
+  assert.equal(socketUrl(), 'wss://starflow-production-7ca6.up.railway.app/ws')
 })

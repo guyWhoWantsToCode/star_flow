@@ -30,7 +30,12 @@ export function useStarFlow(enabled: boolean) {
       lastMessage = 0
       setStatus(failures ? 'reconnecting' : 'connecting')
       if (!failures) setError('')
-      socket = new WebSocket(socketUrl())
+      try { socket = new WebSocket(socketUrl()) }
+      catch (failure) {
+        setStatus('offline')
+        setError(`Cannot open the secure backend connection: ${failure instanceof Error ? failure.message : 'WebSocket initialization failed'}`)
+        return
+      }
       socket.onmessage = event => {
         try {
           const data = parseSnapshot(JSON.parse(event.data))

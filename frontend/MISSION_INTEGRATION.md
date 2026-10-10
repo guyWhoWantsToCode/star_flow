@@ -1,6 +1,6 @@
 # Mission Control integration
 
-The frontend uses the existing backend without modifying or starting it. Vite proxies `/api` HTTP requests and `/api/ws` WebSocket upgrades to the supplied `https://starflow-production-7ca6.up.railway.app` deployment. The service defaults to this public HTTPS address directly, deriving the secure WSS endpoint automatically. A Gemini key belongs exclusively on the backend.
+The frontend uses the deployed backend without modifying or starting it. HTTP requests use `https://starflow-production-7ca6.up.railway.app`; WebSockets use `wss://starflow-production-7ca6.up.railway.app/ws`. These exact endpoints are used in every build, with no environment override or local proxy fallback. A Gemini key belongs exclusively on the backend.
 
 | Interface | Existing backend contract |
 | --- | --- |
@@ -18,6 +18,6 @@ A scheduler release is permission to call Gemini, not confirmation that generati
 
 Disconnected and delayed states retain clearly marked stale values, disable mutations and prompt submission, and offer retry. Freshness is checked every 500 ms, delayed snapshots are marked after 2.5 seconds, and sockets with no response for seven seconds reconnect with bounded backoff. API requests have a 45-second timeout; a timeout does not prove the backend cancelled an accepted request.
 
-For production, serve the SPA for `/`, `/setup`, and `/dashboard`. HTTP and WSS default to the public Railway deployment. The backend must allow the frontend origin through CORS. A different deployment can be selected with `VITE_STARFLOW_API_URL`; setting it to `/api` requires an HTTP/WebSocket reverse proxy.
+For production, serve the SPA for `/`, `/setup`, and `/dashboard`. The backend must allow the frontend origin through CORS. WebSocket constructor failures are caught and displayed in the existing connection-error interface instead of interrupting rendering.
 
 Validation commands: `npm run typecheck`, `npm run lint`, `npm run build`, and `node --test tests/starflow.test.ts`. Contract tests use test-only inputs and never populate application data.
