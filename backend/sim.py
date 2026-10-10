@@ -5,20 +5,27 @@ RATES = {
     "summarizer": 2,
     "tagger": 2
 }
-ROUGE_RATE = 50
+ROGUE_RATE = 20
 
 rogue = False
 
-async def agent_loop(client, name):
-    while True:
-        rate = ROUGE_RATE if (name == "tagger" and rogue) else RATES[name]
-        for _ in range(rate):
-            asyncio.create_task(client.get(f"http://localhost:8000/ask?agent={name}"))
-        await asyncio.sleep(1)
+async def agent_loop(name):
+    limits = httpx.Limits(max_connections=200)
+    async with httpx.AsyncClient(timeout=5, limits=limits) as client:
+        while True:
+            rogue = False
+            try:
+                r = await client.get("http://localhost:8000/rogue")
+                rogue = r.json()["rogue"]
+            except Exception:
+                pass
+
+            rate = ROGUE_RATE if (name == "tagger" and rogue) else RATES[name]
+            for _ in range(rate):
+                asyncio.create_task(client.get(f"http://localhost:8000/ask?agent={name}"))
+            await asyncio.sleep(1)
 
 async def main():
-    async with httpx.AsyncClient(timeout=60) as client:
-        tasks = [asyncio.create_task(agent_loop(client, n)) for n in RATES]
-        await asyncio.gather(*tasks)
+    await asyncio.gather(*[agent_loop(n) for n in RATES])
 
 asyncio.run(main())

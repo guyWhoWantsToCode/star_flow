@@ -23,15 +23,22 @@ async def ws(sock: WebSocket):
         await asyncio.sleep(0.5)
 
 @app.get("/ask")
-async def ask(agent: str, text: str = "hello"):
+async def ask(agent: str, text: str = "hello", real: bool = False):
     try:
         await scheduler.submit(agent)
     except RuntimeError as e:
         return {"ok": False, "error": str(e)}
+    if not real:
+        return {"ok": True}
     answer = await gemini.ask(agent, text)
     return {"ok": True, "answer": answer}
+
 @app.post("/rogue")
 async def set_rogue(on: bool):
     state.ROGUE = on
     state.log("warn" if on else "info", f"tagger rogue {'ON' if on else 'OFF'}")
     return {"rogue": on}
+
+@app.get("/rogue")
+async def get_rogue():
+    return {"rogue": state.ROGUE}
