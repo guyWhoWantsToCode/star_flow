@@ -110,20 +110,24 @@
   max-height:1050px;
   border-bottom:1px solid var(--border)
 }
+#root {
+  position: relative;
+  isolation: isolate;
+}
+
 .galaxy-background {
-  position:absolute;
+  position:fixed;
   inset:0;
-  z-index:-2;
+  z-index:-1;
   pointer-events:none;
   background:radial-gradient(ellipse at 80% 42%,#13223b50,transparent 58%)
 }
-.hero::after {
+.galaxy-background::after {
   content:'';
   position:absolute;
   inset:0;
-  z-index:-1;
   background: linear-gradient(90deg, #05070df5 0%, #05070dc9 30%, #05070d55 53%, transparent 75%),
-    linear-gradient(0deg, #05070d 0%, transparent 24%, transparent 80%, #05070d55 100%);
+    linear-gradient(0deg, #05070d88 0%, transparent 20%, transparent 80%, #05070d55 100%);
   pointer-events:none
 }
 .hero-inner {
@@ -233,7 +237,7 @@ h2 {
 .system-panel {
   border:1px solid var(--border);
   border-radius:10px;
-  background:linear-gradient(120deg,#0e1520,#090d15);
+  background:linear-gradient(120deg,rgba(14,21,32,.94),rgba(9,13,21,.9));
   overflow:hidden
 }
 .panel-top,.panel-bottom {
@@ -427,7 +431,7 @@ h2 {
 .capability-card {
   border:1px solid var(--border);
   border-radius:8px;
-  background:#0b101a;
+  background:rgba(11,16,26,.92);
   padding:25px 27px 31px
 }
 .card-top {
@@ -986,8 +990,8 @@ h2 {
 }
 
 @media (max-width: 760px) {
-  .hero::after {
+  .galaxy-background::after {
     background: linear-gradient(90deg, #05070ddd, #05070d55),
-      linear-gradient(0deg, #05070d 0%, #05070d55 35%, transparent 100%);
+      linear-gradient(0deg, #05070d88 0%, #05070d33 35%, transparent 100%);
   }
 }
