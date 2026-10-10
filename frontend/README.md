@@ -19,25 +19,11 @@ npm run build
 
 New landing components are TypeScript. The existing JSX entry point is retained. Tailwind v4 is configured through its Vite plugin alongside the site's CSS design tokens. Inter is loaded from Google Fonts, with Arial as its fallback.
 
-## Pending: official Binary Orbits
+## Galaxy background
 
-**The mandatory galaxy is not installed.** `REACTBITS_LICENSE_KEY` was unavailable during implementation. `GalaxyBackground.tsx` deliberately reserves the background layer without substituting a different galaxy animation.
+The hero now uses a custom Canvas galaxy inspired by the supplied reference, following the request for a clockwise animation. It does not use the licensed React Bits Binary Orbits component.
 
-Registry URLs and shadcn aliases are configured in `components.json`. The Authorization headers still need configuration: the public React Bits installation page masks the header as `******`, so its exact format was not guessed.
-
-1. Put the real key in `frontend/.env.local` as `REACTBITS_LICENSE_KEY`. This file is ignored by Git. Never use a `VITE_` prefix for the key.
-2. Consult the authenticated official installation guide at https://pro.reactbits.dev/docs/installation and add the documented Authorization headers using an environment-variable reference, not a literal key.
-3. From this directory, install:
-
-   ```sh
-   npx shadcn@latest add @reactbits-starter/binary-orbits-tw
-   ```
-
-4. Read the installed source and https://pro.reactbits.dev/docs/components/binary-orbits before integrating it in `src/components/landing/GalaxyBackground.tsx`.
-5. Use the documented `interactive`, `hoverWake`, and `clickRipple` props to disable interaction. Use its documented `paused` prop for reduced motion, moderate `stars`, slow `speed`, pale blue/violet `colors`, and a tilted, right-offset composition. Verify prop names against the installed version.
-6. Check mobile particle density, text contrast, animation performance, and the production build after installation.
-
-The isolated background wrapper already sits behind content, ignores pointer events, and fades into the next section. It must remain independent of navigation state.
+The star texture is generated once per desktop/mobile size class. A slow clockwise rotation is projected into a tilted disc, with soft violet-blue arms and a luminous core. Rendering is limited to 30 fps and a maximum 1.5 pixel ratio. Mobile uses fewer stars. Resize and intersection observers keep it responsive and stop animation offscreen; tab visibility and reduced-motion preferences also pause it. No extra runtime dependency or license is required.
 
 ## Design
 
