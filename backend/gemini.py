@@ -1,3 +1,4 @@
+import asyncio
 from google import genai
 from dotenv import load_dotenv
 
@@ -12,8 +13,16 @@ JOBS = {
 
 async def ask(agent, text):
     prompt = JOBS.get(agent, "Reply in one short sentence: ") + text
-    r = await client.aio.interactions.create(
-        model="gemini-3.8-flash",
-        input=prompt
-    )
-    return r.output_text
+    try:
+        r = await asyncio.wait_for(
+            client.aio.interactions.create(
+                model="gemini-3.5-flash-lite",
+                input=prompt
+            ),
+            timeout=15,
+        )
+        return r.output_text
+    except asyncio.TimeoutError:
+        return "[rate limited or slow]"
+    except Exception as e:
+        return f"[error: {type(e).__name__}: {e}]"
