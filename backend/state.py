@@ -5,6 +5,16 @@ LIMIT = 10
 
 ROGUE = False
 
+CATALOG = {
+    "chatbot": "Customer chatbot", "triage": "Support triage", "search": "Doc search",
+    "rerank": "Search reranker", "translate": "Translation worker", "moderate": "Content moderator",
+    "fraud": "Fraud screener", "onboard": "Onboarding assistant", "alerts": "Alert explainer",
+    "voice": "Voice call summarizer", "summarizer": "Email summarizer", "tagger": "Data tagger",
+    "notes": "Meeting notes", "invoice": "Invoice parser", "resume": "Resume screener",
+    "caption": "Image captioner", "sentiment": "Sentiment monitor", "lead": "Lead scorer",
+    "review": "Code reviewer", "changelog": "Changelog writer",
+}
+
 AGENTS = {
     "chatbot":    {"share": 5, "tried": 0, "released": 0, "rejected": 0},
     "summarizer": {"share": 3, "tried": 0, "released": 0, "rejected": 0},
@@ -20,6 +30,16 @@ def log(level, text):
     EVENTS.insert(0, {"t": int(time.time() - START), "level": level, "text": text})
     del EVENTS[20:]
 
+def set_agents(ids, shares):
+    AGENTS.clear()
+    LAST.clear()
+    RATES.clear()
+    for i, aid in enumerate(ids):
+        AGENTS[aid] = {"share": shares[i], "tried": 0, "released": 0, "rejected": 0}
+        LAST[aid] = dict(AGENTS[aid])
+        RATES[aid] = {"tried": 0, "released": 0, "rejected": 0}
+    log("info", f"agents set to {', '.join(ids)}")
+
 def tick_rates():
     """Called once a second by the scheduler: totals -> per-second rates."""
     for name, a in AGENTS.items():
@@ -31,6 +51,9 @@ def snapshot():
     return {
         "t": int(time.time() - START),
         "limit": LIMIT,
-        "agents": [{"id": k, **v, "rate": RATES[k]} for k, v in AGENTS.items()],
+        "agents": [
+            {"id": k, "name": CATALOG.get(k, k), **v, "rate": RATES[k]}
+            for k, v in AGENTS.items()
+        ],
         "events": EVENTS[:10],
     }

@@ -3,9 +3,17 @@ import state
 import db
 
 QUEUE_MAX = 20
-queues = {name: asyncio.Queue() for name in state.AGENTS}
+queues = {}
+
+def rebuild_queues():
+    queues.clear()
+    for name in state.AGENTS:
+        queues[name] = asyncio.Queue()
 
 async def submit(agent):
+    if agent not in state.AGENTS:
+        raise RuntimeError(f"unknown agent: {agent}")
+
     a = state.AGENTS[agent]
     a["tried"] += 1
 
