@@ -1,22 +1,24 @@
-import asyncio, httpx
+import asyncio, os, httpx
 
+BASE = os.environ.get("STARFLOW_URL", "http://localhost:8000")
 ROGUE_RATE = 20
 
 async def fire(client, name, sem):
     async with sem:
         try:
-            await client.get(f"http://localhost:8000/ask?agent={name}")
+            await client.get(f"{BASE}/ask?agent={name}")
         except Exception:
             pass
 
 async def main():
+    print(f"hitting {BASE}")
     sem = asyncio.Semaphore(60)
     limits = httpx.Limits(max_connections=120)
     async with httpx.AsyncClient(timeout=10, limits=limits) as client:
         while True:
             try:
-                snap = (await client.get("http://localhost:8000/snapshot")).json()
-                rogue = (await client.get("http://localhost:8000/rogue")).json()["rogue"]
+                snap = (await client.get(f"{BASE}/snapshot")).json()
+                rogue = (await client.get(f"{BASE}/rogue")).json()["rogue"]
             except Exception:
                 await asyncio.sleep(1)
                 continue
