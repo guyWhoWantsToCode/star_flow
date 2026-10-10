@@ -1,9 +1,11 @@
+import { useMissionNavigation } from '../../mission/navigation'
 import { useState } from 'react'
 import { Brand } from './Brand'
 import { links } from './navigation'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const launch = useMissionNavigation()
   return (
     <header className="navbar">
       <div className="container nav-inner">
@@ -12,7 +14,7 @@ export default function Navbar() {
           {links.map(([label, id]) => <a key={id} href={`/#${id}`}>{label}</a>)}
         </nav>
         <div className="nav-actions">
-          <a className="mission-link" href="/dashboard">
+          <a className="mission-link" href="/setup" onClick={launch}>
             <span>Launch Mission</span>
             <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 15 15 5M5 5h10v10" stroke="currentColor" strokeWidth="1.3" /></svg>
           </a>
