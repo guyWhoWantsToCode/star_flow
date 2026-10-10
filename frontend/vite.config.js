@@ -6,7 +6,7 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    proxy: { '/api': { target: 'https://theorem-sensor-singing-sydney.trycloudflare.com', ws: true, changeOrigin: true, rewrite: path => path.replace(/^\/api/, '') } },
+    proxy: { '/api': { target: 'https://starflow-production-7ca6.up.railway.app', ws: true, changeOrigin: true, rewrite: path => path.replace(/^\/api/, '') } },
   },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
 })

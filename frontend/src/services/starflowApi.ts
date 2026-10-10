@@ -24,7 +24,7 @@ export function parseSnapshot(value: unknown): Snapshot {
 
 export function waiting(agent: AgentSnapshot) { return Math.max(0, agent.tried - agent.released - agent.rejected) }
 const configuredBase = (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env?.VITE_STARFLOW_API_URL
-export const apiBase = (configuredBase || '/api').replace(/\/$/, '')
+export const apiBase = (configuredBase || 'https://starflow-production-7ca6.up.railway.app').replace(/\/$/, '')
 export function socketUrl() {
   const url = new URL(`${apiBase}/ws`, location.origin)
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
