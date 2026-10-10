@@ -36,4 +36,6 @@ async def run():
                 if not q.empty():
                     _release(name)
                     budget -= 1
+
+        state.tick_rates()
         await asyncio.sleep(1)

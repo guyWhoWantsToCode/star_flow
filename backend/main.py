@@ -42,3 +42,14 @@ async def set_rogue(on: bool):
 @app.get("/rogue")
 async def get_rogue():
     return {"rogue": state.ROGUE}
+
+@app.post("/shares")
+async def set_shares(chatbot: int, summarizer: int, tagger: int):
+    total = chatbot + summarizer + tagger
+    if total > state.LIMIT:
+        return {"ok": False, "error": f"{total}/s exceeds limit of {state.LIMIT}/s"}
+    state.AGENTS["chatbot"]["share"] = chatbot
+    state.AGENTS["summarizer"]["share"] = summarizer
+    state.AGENTS["tagger"]["share"] = tagger
+    state.log("info", f"shares set to {chatbot}/{summarizer}/{tagger}")
+    return {"ok": True}
