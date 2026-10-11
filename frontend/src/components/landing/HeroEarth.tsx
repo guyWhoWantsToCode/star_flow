@@ -86,8 +86,11 @@ export default function HeroEarth() {
     }
     const resize = () => {
       const size=Math.min(1200,Math.round(canvas.clientWidth*Math.min(devicePixelRatio || 1,1.5)))
-      if(canvas.width===size && canvas.height===size) return
-      canvas.width=canvas.height=size; gl.viewport(0,0,size,size); update()
+      if(canvas.width!==size || canvas.height!==size) {
+        canvas.width=canvas.height=size
+        gl.viewport(0,0,size,size)
+      }
+      update()
     }
     const image = new Image()
     image.onload = () => {
