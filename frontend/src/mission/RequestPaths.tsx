@@ -1,5 +1,4 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState, useId, type RefObject } from 'react'
-import { agents } from './agents'
 import { type AgentId, type Snapshot } from '../services/starflowApi'
 import { connectionColors, connectorPath, portCenter, stationDrift, type Point } from './connectionGeometry'
 
@@ -29,7 +28,7 @@ export default function RequestPaths({ snapshot, live, consoleRef }: { snapshot:
   const [geometry, setGeometry] = useState<Geometry>({ width: 1, height: 1, routes: [] })
   const serial = useRef(0)
   const uid = useId().replace(/:/g,'')
-  const ids = (snapshot?.agents ?? agents).slice(0,4).map(agent => agent.id).join(',')
+  const ids = (snapshot?.agents ?? []).slice(0,4).map(agent => agent.id).join(',')
   // Parent host refs attach after child layout effects. Measure in the passive
   // phase so a dashboard mounted with an existing snapshot gets all four paths.
   useEffect(() => {
@@ -51,7 +50,7 @@ export default function RequestPaths({ snapshot, live, consoleRef }: { snapshot:
         const start = portCenter(source.getBoundingClientRect(), origin)
         const measuredEnd = portCenter(destination.getBoundingClientRect(), origin)
         const end = { x: measuredEnd.x - offset.x, y: measuredEnd.y - offset.y }
-        return [{ id, color: connectionColors[index], start, end, vertical, path: connectorPath(start,end,vertical) }]
+        return [{ id, color: id === snapshot?.rogue ? '#ff6474' : connectionColors[index], start, end, vertical, path: connectorPath(start,end,vertical) }]
       })
       setGeometry(current => current.width === origin.width && current.height === origin.height && JSON.stringify(current.routes) === JSON.stringify(routes) ? current : { width: origin.width, height: origin.height, routes })
     }
@@ -67,7 +66,7 @@ export default function RequestPaths({ snapshot, live, consoleRef }: { snapshot:
     // Geometry synchronizes the rendered docking ports with their SVG connections.
     measure()
     return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); rendererObserver.disconnect(); window.removeEventListener('resize',schedule) }
-  }, [ids, consoleRef])
+  }, [ids, snapshot?.rogue, consoleRef])
   useLayoutEffect(() => {
     const stage = consoleRef.current?.querySelector<HTMLElement>('.station-stage')
     const svg = svgRef.current

@@ -117,3 +117,9 @@
   .dashboard-screen .scheduler-wordmark{animation:none!important}
   .dashboard-screen .station-core-label strong::after,.dashboard-screen .scheduler-band::before{opacity:0}
 }
+
+/* Rogue identity comes exclusively from the live snapshot. */
+.dashboard-screen .agent-is-rogue { --agent-color: #ff6474 !important; }
+.dashboard-screen .agent-is-rogue .agent-module-heading { border-color: #ff647499; }
+.dashboard-screen .agent-is-rogue .agent-status.rogue { color: #ffd3d9; border-color: #ff647480; background: #391725; }
+.rogue-agent-controls { display: grid; gap: 8px; }

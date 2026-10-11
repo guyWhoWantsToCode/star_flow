@@ -2,7 +2,7 @@ export const agentIds = ['chatbot', 'summarizer', 'tagger'] as const
 export type AgentId = string
 export type Counts = { tried: number; released: number; rejected: number }
 export type AgentSnapshot = Counts & { id: AgentId; name: string; share: number; rate: Counts }
-export type Snapshot = { t: number; limit: number; agents: AgentSnapshot[]; events: { t: number; level: string; text: string }[] }
+export type Snapshot = { t: number; limit: number; agents: AgentSnapshot[]; rogue?: AgentId | null; events: { t: number; level: string; text: string }[] }
 export type Connection = 'connecting' | 'live' | 'data delayed' | 'reconnecting' | 'offline' | 'contract error'
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 const count = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
@@ -19,12 +19,13 @@ export function parseSnapshot(value: unknown): Snapshot {
     if (!record(event) || !count(event.t) || typeof event.text !== 'string' || typeof event.level !== 'string') throw new Error('Invalid scheduler event')
     return { t: event.t, text: event.text, level: event.level }
   })
-  return { t: value.t, limit: value.limit, agents, events }
+  return { t: value.t, limit: value.limit, agents, events, rogue: typeof value.rogue === 'string' ? value.rogue : value.rogue === null ? null : undefined }
 }
 
 export function waiting(agent: AgentSnapshot) { return Math.max(0, agent.tried - agent.released - agent.rejected) }
-export const apiBase = 'https://starflow-production-7ca6.up.railway.app'
+export const apiBase = import.meta.env?.DEV ? '/starflow-api' : 'https://starflow-production-7ca6.up.railway.app'
 export function socketUrl() {
+  if (import.meta.env?.DEV) return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/starflow-api/ws`
   return 'wss://starflow-production-7ca6.up.railway.app/ws'
 }
 async function request(path: string, method = 'GET', signal?: AbortSignal): Promise<Record<string, unknown>> {
@@ -35,10 +36,8 @@ async function request(path: string, method = 'GET', signal?: AbortSignal): Prom
   if (result.ok === false) throw new Error(typeof result.error === 'string' ? result.error : 'Request rejected')
   return result
 }
-export async function readRogue(signal?: AbortSignal) {
-  const result = await request('/rogue', 'GET', signal)
-  if (typeof result.rogue !== 'boolean') throw new Error('Invalid rogue state')
-  return result.rogue
+export async function readSnapshot(signal?: AbortSignal) {
+  return parseSnapshot(await request('/snapshot', 'GET', signal))
 }
 export async function readCatalog(signal?: AbortSignal) {
   const result = await request('/catalog', 'GET', signal)
@@ -59,10 +58,10 @@ export async function configureAgents(ids: string[]) {
   const result = await request(`/agents?${new URLSearchParams({ ids: ids.join(','), shares: shares.join(',') })}`, 'POST')
   if (result.ok !== true) throw new Error('Agent configuration was not confirmed')
 }
-export async function setRogue(on: boolean) {
-  const result = await request(`/rogue?on=${on}`, 'POST')
-  if (result.rogue !== on) throw new Error('Rogue change was not confirmed')
-  return on
+export async function setRogue(on: boolean, agent: AgentId) {
+  const result = await request(`/rogue?${new URLSearchParams({ on: String(on), agent })}`, 'POST')
+  if (result.rogue !== (on ? agent : null)) throw new Error('Rogue change was not confirmed')
+  return result.rogue
 }
 export async function setShares(shares: Record<AgentId, number>, limit: number) {
   if (!Object.keys(shares).length || Object.entries(shares).some(([id,value]) => !id.trim() || id.includes(',') || !count(value)) || Object.values(shares).reduce((a,b) => a+b, 0) > limit) throw new Error('Shares must be nonnegative integers within capacity')

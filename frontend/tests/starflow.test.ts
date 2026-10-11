@@ -1,12 +1,40 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { parseSnapshot, waiting, setShares } from '../src/services/starflowApi.ts'
+import { parseSnapshot, waiting, setShares, setRogue } from '../src/services/starflowApi.ts'
 // Contract fixtures are used only by tests; the app never supplies simulated snapshots.
 const snapshot = () => ({ t: 8, limit: 10, agents: [
   { id: 'chatbot', share: 5, tried: 3, released: 3, rejected: 0, rate: { tried: 3, released: 3, rejected: 0 } },
   { id: 'summarizer', share: 3, tried: 2, released: 2, rejected: 0, rate: { tried: 2, released: 2, rejected: 0 } },
   { id: 'tagger', share: 2, tried: 30, released: 5, rejected: 10, rate: { tried: 20, released: 5, rejected: 10 } },
 ], events: [{ t: 7, level: 'info', text: 'Backend event' }] })
+test('rogue identity follows the server ID across different agents and reordered lineups', () => {
+  for (const id of ['tagger', 'chatbot', 'summarizer']) {
+    const parsed = parseSnapshot({ ...snapshot(), rogue: id })
+    assert.deepEqual(parsed.agents.filter(agent => agent.id === parsed.rogue).map(agent => agent.id), [id])
+    const reordered = parseSnapshot({ ...snapshot(), agents: snapshot().agents.reverse(), rogue: id })
+    assert.deepEqual(reordered.agents.filter(agent => agent.id === reordered.rogue).map(agent => agent.id), [id])
+  }
+  assert.equal(parseSnapshot({ ...snapshot(), rogue: null }).rogue, null)
+  assert.equal(parseSnapshot(snapshot()).rogue, undefined)
+})
+test('rogue requests send the actual agent ID and validate the server response', async () => {
+  const originalFetch = globalThis.fetch
+  try {
+    for (const agent of ['tagger', 'chatbot']) {
+      for (const on of [true, false]) {
+        globalThis.fetch = async (url, options) => {
+          const parsed = new URL(String(url))
+          assert.equal(parsed.pathname, '/rogue')
+          assert.equal(parsed.searchParams.get('agent'), agent)
+          assert.equal(parsed.searchParams.get('on'), String(on))
+          assert.equal(options?.method, 'POST')
+          return new Response(JSON.stringify({ rogue: on ? agent : null }))
+        }
+        assert.equal(await setRogue(on, agent), on ? agent : null)
+      }
+    }
+  } finally { globalThis.fetch = originalFetch }
+})
 test('uses rates independently from the current waiting queue', () => {
   const parsed = parseSnapshot(snapshot())
   assert.equal(waiting(parsed.agents[2]), 15)

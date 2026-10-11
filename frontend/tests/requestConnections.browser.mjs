@@ -212,6 +212,21 @@ try {
     return {text:node.textContent,font:style.fontFamily,size:style.fontSize,weight:style.fontWeight,spacing:style.letterSpacing,gap:style.gap,icon:icon.outerHTML,iconColor:getComputedStyle(icon).color,iconWidth:getComputedStyle(icon).width}
   })()`)
   const dashboardBrand = await brand()
+  for (const rogue of ['tagger','chatbot']) {
+    await send('Page.navigate',{url:new URL(`tests/request-connections.preview.html?four&rogue=${rogue}`,server.resolvedUrls.local[0]).href})
+    for (let attempt=0;attempt<50;attempt++) {
+      if (await evaluate('document.querySelectorAll(".request-channel").length===4')) break
+      await pause(100)
+    }
+    const result=await evaluate(`(() => {
+      const card=document.querySelector('.agent-is-rogue')
+      const path=document.querySelector('[data-route-id="${rogue}"]')
+      const index=Array.from(document.querySelectorAll('[data-route-id]')).indexOf(path)
+      return {id:card?.dataset.agentModule,badge:card?.querySelector('.agent-status').textContent,count:document.querySelectorAll('.agent-is-rogue').length,pipe:getComputedStyle(document.querySelectorAll('.request-channel')[index]).color}
+    })()`)
+    assert.equal(result.id,rogue); assert.equal(result.badge,'Rogue on'); assert.equal(result.count,1)
+    assert.equal(result.pipe,'rgb(255, 100, 116)','red pipe follows the server rogue ID')
+  }
   await send('Page.navigate',{url:server.resolvedUrls.local[0]})
   for (let attempt=0;attempt<50;attempt++) {
     await pause(100)

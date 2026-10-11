@@ -20,9 +20,9 @@ export default function Preview() {
 // Deterministic regression fixture only; production continues to use the backend.
 // All four IDs are present before mount, which previously left every path empty.
 const fixture = {
-  t:0,limit:10,events:[],agents:[['chatbot','Customer chatbot'],['triage','Support triage'],['fraud','Fraud screener'],['tagger','Data tagger']].map(([id,name],index) => ({id,name,share:index<2 ? 3 : 2,tried:0,released:0,rejected:0,rate:{tried:0,released:0,rejected:0}})),
+  t:0,limit:10,rogue:new URLSearchParams(location.search).get('rogue'),events:[],agents:[['chatbot','Customer chatbot'],['triage','Support triage'],['fraud','Fraud screener'],['tagger','Data tagger']].map(([id,name],index) => ({id,name,share:index<2 ? 3 : 2,tried:0,released:0,rejected:0,rate:{tried:0,released:0,rejected:0}})),
 }
 const regression = new URLSearchParams(location.search).has('four')
 createRoot(document.getElementById('root')).render(regression
-  ? <><GalaxyBackground/><HeroEarth/><LunarOrbits mission/><MissionControl connection={{snapshot:fixture,status:'live',error:'',rogue:false,setRogue:() => {},retry:() => {}}} onSetup={() => {}}/></>
+  ? <><GalaxyBackground/><HeroEarth/><LunarOrbits mission/><MissionControl connection={{snapshot:fixture,status:'live',error:'',retry:() => {}}} onSetup={() => {}}/></>
   : <Preview/>)
