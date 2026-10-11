@@ -30,7 +30,9 @@ export default function RequestPaths({ snapshot, live, consoleRef }: { snapshot:
   const serial = useRef(0)
   const uid = useId().replace(/:/g,'')
   const ids = (snapshot?.agents ?? agents).slice(0,4).map(agent => agent.id).join(',')
-  useLayoutEffect(() => {
+  // Parent host refs attach after child layout effects. Measure in the passive
+  // phase so a dashboard mounted with an existing snapshot gets all four paths.
+  useEffect(() => {
     const console = consoleRef.current
     if (!console) return
     let frame = 0, disposed = false

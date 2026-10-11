@@ -44,11 +44,10 @@ test('connections start and finish at measured docking centers after resizing', 
       const source = portCenter({left:origin.left + width*(right ? .75 : .25)-13,top:origin.top+(lower ? 470 : 130),width:26,height:48},origin)
       const destination = portCenter({left:origin.left + width*(right ? .59 : .41),top:origin.top+(lower ? 420 : 260),width:16,height:16},origin)
       const path = connectorPath(source,destination)
-      assert.ok(path.startsWith(`M${source.x} ${source.y} C`))
+      assert.ok(path.startsWith(`M${source.x} ${source.y} L`))
       assert.ok(path.endsWith(` ${destination.x} ${destination.y}`))
       const points = path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
-      assert.equal(points[3],source.y,'source tangent stays horizontal')
-      assert.equal(points[5],destination.y,'destination tangent stays horizontal')
+      assert.deepEqual(points,[source.x,source.y,destination.x,destination.y],'desktop connectors take the direct route drawn in the reference')
       assert.ok(points.every(Number.isFinite))
     }
   }
@@ -75,7 +74,7 @@ test('station drift keeps all four sources anchored and docking endpoints attach
       const end = {x:dock.x+offset.x,y:dock.y+offset.y}
       for (const vertical of [false,true]) {
         const path = connectorPath(start,end,vertical)
-        assert.ok(path.startsWith(`M${start.x} ${start.y} C`))
+        assert.ok(path.startsWith(`M${start.x} ${start.y} ${vertical ? 'C' : 'L'}`))
         assert.ok(path.endsWith(` ${end.x} ${end.y}`))
       }
     }

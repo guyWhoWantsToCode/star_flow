@@ -1,9 +1,10 @@
-import { memo, useEffect, useRef, type CSSProperties } from 'react'
+import { memo, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { connectionColors, stationDockAnchor } from './connectionGeometry'
 import StationDepthEffects from './StationDepthEffects'
-import StationCanvas from './StationCanvas'
+import StationCanvas, { type StationRenderer } from './StationCanvas'
 function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?: number }) {
   const stageRef = useRef<HTMLDivElement>(null)
+  const [renderer, setRenderer] = useState<StationRenderer>('loading')
   useEffect(() => {
     const stage = stageRef.current!
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
@@ -12,7 +13,7 @@ function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?:
     const update = () => {
       const active = live && visible && !document.hidden && !motion.matches
       stage.dataset.effectsActive = String(active)
-      layers.forEach(layer => { if (active && stage.dataset.renderer !== '3d') layer.unpauseAnimations(); else layer.pauseAnimations() })
+      layers.forEach(layer => { if (active && stage.dataset.renderer === 'fallback') layer.unpauseAnimations(); else layer.pauseAnimations() })
     }
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update() })
     const rendererObserver = new MutationObserver(update)
@@ -30,11 +31,12 @@ function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?:
     }
   }, [live])
   return <div className={`gemini-station ${live ? 'station-live' : ''}`}>
-    <div className="station-stage" ref={stageRef}>
+    <div className="station-stage" ref={stageRef} data-renderer={renderer} aria-busy={renderer === 'loading'}>
       <div className="station-depth-aura" aria-hidden="true"/>
       <StationDepthEffects layer="rear"/>
-      <StationCanvas live={live} activeCount={activeCount}/>
-      <img className="station-render" src="/images/mission-station.png" width="1159" height="1357" alt="" decoding="async" fetchPriority="high"/>
+      <StationCanvas live={live} activeCount={activeCount} onRendererChange={setRenderer}/>
+      {renderer === 'fallback' && <img className="station-render" src="/images/mission-station-current.png" width="1159" height="1357" alt="" decoding="async"/>}
+      {renderer === 'loading' && <div className="station-loading" aria-hidden="true"><i/><i/><i/></div>}
       <div className="station-energy" aria-hidden="true"/>
       <div className="station-glass-light" aria-hidden="true"><i/></div>
       <StationDepthEffects layer="front"/>
@@ -46,8 +48,8 @@ function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?:
         } as CSSProperties
         return <span key={color} className={`station-inlet station-inlet-${index}`} data-station-port={index} style={style} aria-hidden="true"/>
       })}
-      <div className="station-core-label"><strong>Gemini</strong></div>
-      <div className="scheduler-band">StarFlow scheduler</div>
+      <div className="station-core-label"><strong data-label="Gemini">Gemini</strong></div>
+      <div className="scheduler-band"><span className="scheduler-wordmark"><b>StarFlow</b>{' scheduler'}</span></div>
     </div>
     <span className="station-caption">Guaranteed shares first. Unused capacity flows to agents that need it.</span>
   </div>

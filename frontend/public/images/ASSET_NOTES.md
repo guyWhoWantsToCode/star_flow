@@ -2,7 +2,10 @@
 
 ## Live 3D station
 
-The Mission Control station now renders real geometry with Three.js: a bevelled titanium outer ring, counter-rotating calibration ring, clear-coated rotating core, equatorial docking mechanism, and two rotating sensor masts. All labels and live connection paths remain HTML/SVG. The original transparent station image is preserved as a fallback when WebGL, shaders or the new texture are unavailable. The shared landing-page galaxy and Earth backgrounds are unchanged.
+The Mission Control station now renders real geometry with Three.js: a bevelled titanium outer ring, counter-rotating calibration ring, clear-coated rotating core, equatorial docking mechanism, and two rotating sensor masts. All labels and live connection paths remain HTML/SVG. A transparent still exported from this current renderer (`mission-station-current.png`) is the fallback when WebGL, shaders or the texture are unavailable. The original generated station image is retained as an unused source asset. The shared landing-page galaxy and Earth backgrounds are unchanged.
+
+- `mission-station-current.png` is a transparent 862 × 1009 PNG canvas export of `src/mission/stationScene.ts`, with its existing generated metal texture, captured at retina resolution by the isolated native-WebGL browser regression runner. It contains no baked-in text or backend data.
+- The renderer starts in an explicit loading state, reserves its dimensions, and reveals the model only after its first complete frame. The fallback is requested only on renderer failure, preventing the previous image from flashing during initialization.
 
 - New asset: `frontend/public/images/station-metal-v2.jpg`, 2172 × 724, JPEG quality 90. Used as the metal color and subtle bump map.
 - Generation mode: built-in image-generation tool; no API/CLI fallback.

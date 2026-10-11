@@ -24,9 +24,8 @@ export function connectorPath(start: Point, end: Point, vertical = false) {
     const direction = end.y < start.y ? -1 : 1
     return `M${start.x} ${start.y} C${start.x} ${start.y + bend * direction} ${end.x} ${end.y - bend * direction} ${end.x} ${end.y}`
   }
-  const bend = Math.max(28, Math.abs(end.x - start.x) * .52)
-  const direction = end.x < start.x ? -1 : 1
-  return `M${start.x} ${start.y} C${start.x + bend * direction} ${start.y} ${end.x - bend * direction} ${end.y} ${end.x} ${end.y}`
+  // Direct diagonal runs match the four card-to-rim routes in the reference.
+  return `M${start.x} ${start.y} L ${end.x} ${end.y}`
 }
 export function portCenter(rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>, origin: Pick<DOMRect, 'left' | 'top'>): Point {
   return { x: rect.left + rect.width / 2 - origin.left, y: rect.top + rect.height / 2 - origin.top }

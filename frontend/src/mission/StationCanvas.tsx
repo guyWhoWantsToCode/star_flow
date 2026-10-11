@@ -1,7 +1,13 @@
 import { memo, useEffect, useRef } from 'react'
 import type { StationScene } from './stationScene'
 
-function StationCanvas({ live, activeCount }: { live: boolean; activeCount: number }) {
+export type StationRenderer = 'loading' | '3d' | 'fallback'
+
+function StationCanvas({ live, activeCount, onRendererChange }: {
+  live: boolean
+  activeCount: number
+  onRendererChange: (renderer: StationRenderer) => void
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sceneRef = useRef<StationScene | null>(null)
   const statusRef = useRef({ live, activeCount })
@@ -11,14 +17,14 @@ function StationCanvas({ live, activeCount }: { live: boolean; activeCount: numb
   }, [live, activeCount])
   useEffect(() => {
     const canvas = canvasRef.current!
-    const stage = canvas.parentElement!
     let disposed = false
-    const fallback = () => { if (!disposed) delete stage.dataset.renderer }
+    onRendererChange('loading')
+    const fallback = () => { if (!disposed) onRendererChange('fallback') }
     // Load the renderer only on Mission Control, leaving the landing page light.
     void import('./stationScene').then(({ createStationScene }) => {
       if (disposed) return
       sceneRef.current = createStationScene(canvas, {
-        onReady: () => { if (!disposed) stage.dataset.renderer = '3d' },
+        onReady: () => { if (!disposed) onRendererChange('3d') },
         onFailure: fallback,
       })
       const status = statusRef.current
@@ -28,9 +34,8 @@ function StationCanvas({ live, activeCount }: { live: boolean; activeCount: numb
       disposed = true
       sceneRef.current?.dispose()
       sceneRef.current = null
-      delete stage.dataset.renderer
     }
-  }, [])
+  }, [onRendererChange])
   return <canvas className="station-canvas" ref={canvasRef} aria-hidden="true"/>
 }
 

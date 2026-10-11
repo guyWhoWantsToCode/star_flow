@@ -20,15 +20,15 @@
 .brand {
   display:inline-flex;
   align-items:center;
-  gap:10px;
-  font-size:23px;
-  font-weight:600;
-  letter-spacing:-.9px
+  gap:11px;
+  font-size:21px;
+  font-weight:550;
+  letter-spacing:-.65px
 }
 .brand svg {
-  width:34px;
-  height:34px;
-  color:#a8d1f7
+  width:35px;
+  height:35px;
+  color:#b6d4ef
 }
 .nav-links {
   display:flex;
@@ -714,8 +714,8 @@ h2 {
     gap:15px
   }
   .brand {
-    font-size:21px;
-    gap:7px
+    font-size:20px;
+    gap:8px
   }
   .brand svg {
     width:30px;

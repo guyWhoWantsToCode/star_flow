@@ -1,0 +1,56 @@
+/* Atmospheric scenes sit behind the panels; the live ports and numbers stay clear. */
+.agent-cosmic-effects {
+  --card-exterior-outset: clamp(24px, calc((100vw - 1580px) / 2 - 8px), 64px);
+  position: absolute;
+  inset: -37% -17% -13%;
+  z-index: -2;
+  color: var(--agent-color, #80c4e9);
+  pointer-events: none;
+  user-select: none;
+  contain: layout style paint;
+}
+.card-space-scene { display: block; width: 100%; height: 100%; overflow: visible; }
+.card-space-haze {
+  position: absolute; inset: 6% 2% 1%; border-radius: 50%; opacity: .8;
+  background: radial-gradient(ellipse at 27% 33%, color-mix(in srgb, currentColor 14%, transparent), transparent 40%), radial-gradient(ellipse at 83% 58%, color-mix(in srgb, currentColor 9%, transparent), transparent 38%);
+  animation: card-space-breathe 5.6s ease-in-out infinite;
+}
+.card-space-light { filter: var(--card-light-filter); }
+.card-space-cloud { filter: var(--card-cloud-filter); }
+.card-space-filaments { stroke-width: 1; }
+.card-space-orbit-spin { transform-origin: 0 0; animation: card-space-orbit 15s linear infinite; }
+.card-space-nebula-drift { transform-origin: 280px 180px; animation: card-space-nebula 8s ease-in-out infinite; }
+.card-space-nebula-spark { animation: card-space-spark 4.4s -.9s ease-in-out infinite; }
+.card-space-vortex-turn { transform-origin: 0 0; animation: card-space-vortex 22s linear infinite; }
+.card-space-dust-drift { animation: card-space-dust 7s ease-in-out infinite; }
+.card-space-stone { transform-box: fill-box; transform-origin: center; }
+.card-space-stone-one { animation: card-space-stone-float 8s -.8s ease-in-out infinite; }
+.card-space-stone-two { animation: card-space-stone-float 10s -4s ease-in-out infinite reverse; }
+.card-space-stone-three { animation: card-space-stone-float 7s -2s ease-in-out infinite; }
+.card-space-dust { animation: card-space-dust 6.4s -2s ease-in-out infinite reverse; }
+.card-space-twinkle { animation: card-space-twinkle var(--star-duration, 4s) var(--star-delay, 0s) ease-in-out infinite; }
+.agent-cosmic-effects[data-cosmic-active='false'] * { animation-play-state: paused!important; }
+@keyframes card-space-breathe { 0%,100% { opacity: .55; transform: scale(.98); } 50% { opacity: .95; transform: scale(1.025); } }
+@keyframes card-space-orbit { to { transform: rotate(360deg); } }
+@keyframes card-space-nebula { 0%,100% { transform: translate3d(-3px,2px,0) scale(.98); opacity: .65; } 50% { transform: translate3d(4px,-3px,0) scale(1.02); opacity: 1; } }
+@keyframes card-space-spark { 0%,100% { opacity: .35; } 45% { opacity: .9; } }
+@keyframes card-space-vortex { to { transform: rotate(360deg); } }
+@keyframes card-space-dust { 0%,100% { transform: translate3d(-3px,2px,0); opacity: .55; } 50% { transform: translate3d(4px,-3px,0); opacity: 1; } }
+@keyframes card-space-stone-float { 0%,100% { transform: translate3d(0,0,0) rotate(-5deg); } 50% { transform: translate3d(5px,-7px,0) rotate(9deg); } }
+@keyframes card-space-twinkle { 0%,100% { opacity: .2; } 50% { opacity: .85; } }
+@media(min-width:761px) and (max-width:1100px) { .agent-cosmic-effects { --card-exterior-outset: 16px; inset: -28% -11% -9%; opacity: .85; } }
+@media(max-width:760px) {
+  .agent-cosmic-effects { inset: -15% -3% -8%; opacity: .72; }
+  .card-space-scene { overflow: hidden; }
+  .card-space-cloud { opacity: .2; }
+}
+/* Allow generous light toward the station, while keeping outer halos inside the page. */
+@media(min-width:761px) {
+  .card-space-orbital,.card-space-vortex { left: calc(-1 * var(--card-exterior-outset)); }
+  .card-space-nebula,.card-space-asteroid { right: calc(-1 * var(--card-exterior-outset)); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .agent-cosmic-effects * { animation: none!important; }
+  .card-space-haze { opacity: .55; }
+  .card-space-twinkle { opacity: .45; }
+}
