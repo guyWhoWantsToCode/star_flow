@@ -1258,6 +1258,24 @@ a.button[href='/setup']:focus-visible::before { opacity: 1; }
 }
 
 /* Opaque panel fills provide depth without re-blurring the moving galaxy each frame. */
+.hero-earth {
+  position: fixed;
+  width: min(76vw, 1150px);
+  aspect-ratio: 1;
+  left: -15%;
+  /* Account for the canvas atmosphere so the globe's visible edge sits below the orbits. */
+  top: calc(min(31.36vw, 474.5px) + 219px);
+  transform: translateY(calc(-45% + var(--earth-scroll, 0px)));
+  z-index: -1;
+  pointer-events: none;
+  opacity: .8;
+  mask-image: linear-gradient(90deg, #000 0%, #000 35%, #0009 58%, transparent 92%);
+}
+.hero-earth canvas { display: block; width: 100%; height: 100%; }
+.hero-copy { text-shadow: 0 2px 16px #05070d, 0 0 32px #05070d; }
+@media(max-width:760px) {
+  .hero-earth { width: 110vw; left: -39%; top: calc(45.4vw + 284px); opacity: .53; }
+}
 #how-it-works .system-panel,
 #capabilities .capability-card {
   backdrop-filter: none;

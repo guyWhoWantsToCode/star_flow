@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
 import LandingPage from '../components/landing/LandingPage'
 import GalaxyBackground from '../components/landing/GalaxyBackground'
+import HeroEarth from '../components/landing/HeroEarth'
 import LunarOrbits from '../components/landing/LunarOrbits'
 import { configureAgents, type AgentId } from '../services/starflowApi'
 import { useStarFlow } from '../hooks/useStarFlow'
@@ -83,5 +84,5 @@ export default function MissionApp() {
     setSetupKey(value => value + 1)
     navigate('/setup','setup')
   }
-  return <MissionNavigation.Provider value={launch}><GalaxyBackground/><LunarOrbits mission={phase !== 'landing' && phase !== 'launching'}/>{phase === 'landing' || phase === 'launching' ? <div className={phase === 'launching' ? 'landing-launching' : ''}><LandingPage/></div> : phase === 'setup' || phase === 'initializing' ? <AgentSelection key={setupKey} status={connection.status} error={configurationError || (active ? connection.error : '')} initializing={phase === 'initializing'} onPower={powerOn} onRetry={retrySetup} onReset={resetSetup}/> : <MissionControl connection={connection} onSetup={resetSetup}/>} {phase === 'launching' && <SpaceTravel onComplete={arrive}/>}</MissionNavigation.Provider>
+  return <MissionNavigation.Provider value={launch}><GalaxyBackground/><HeroEarth/><LunarOrbits mission={phase !== 'landing' && phase !== 'launching'}/>{phase === 'landing' || phase === 'launching' ? <div className={phase === 'launching' ? 'landing-launching' : ''}><LandingPage/></div> : phase === 'setup' || phase === 'initializing' ? <AgentSelection key={setupKey} status={connection.status} error={configurationError || (active ? connection.error : '')} initializing={phase === 'initializing'} onPower={powerOn} onRetry={retrySetup} onReset={resetSetup}/> : <MissionControl connection={connection} onSetup={resetSetup}/>} {phase === 'launching' && <SpaceTravel onComplete={arrive}/>}</MissionNavigation.Provider>
 }
