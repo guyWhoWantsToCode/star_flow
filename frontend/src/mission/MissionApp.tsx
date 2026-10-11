@@ -10,6 +10,7 @@ import SpaceTravel from './SpaceTravel'
 import AgentSelection from './AgentSelection'
 import MissionControl from './MissionControl'
 import './mission.css'
+import './dashboard.css'
 const route = () => location.pathname === '/dashboard' ? 'dashboard' : location.pathname === '/setup' ? 'setup' : 'landing'
 type Phase = 'landing' | 'launching' | 'setup' | 'initializing' | 'dashboard'
 export default function MissionApp() {

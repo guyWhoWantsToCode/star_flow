@@ -1,6 +1,48 @@
-import { memo } from 'react'
-function GeminiStation({ live }: { live: boolean }) {
-  return <div className={`gemini-station ${live ? 'station-live' : ''}`}><svg viewBox="0 0 360 360" fill="none" aria-hidden="true"><defs><radialGradient id="core-sphere" cx="35%" cy="25%" r="78%"><stop stopColor="#78bce9"/><stop offset=".28" stopColor="#254f80"/><stop offset=".65" stopColor="#101f37"/><stop offset="1" stopColor="#040912"/></radialGradient><linearGradient id="station-metal" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#6083a8"/><stop offset=".4" stopColor="#192e48"/><stop offset=".6" stopColor="#668caf"/><stop offset="1" stopColor="#14253a"/></linearGradient><clipPath id="sphere-clip"><circle cx="180" cy="180" r="94"/></clipPath></defs><path d="M180 9v42m0 258v42" stroke="#38536d" strokeWidth="3"/><circle cx="180" cy="180" r="140" stroke="#192d43" strokeWidth="14"/><circle cx="180" cy="180" r="140" stroke="url(#station-metal)" strokeWidth="5"/><circle className="station-orbit" cx="180" cy="180" r="128" stroke="#75b9ef" strokeOpacity=".6" strokeWidth="2" strokeDasharray="2 16 32 16"/><circle cx="180" cy="180" r="94" fill="url(#core-sphere)" stroke="#8dcaf4" strokeOpacity=".5" strokeWidth="1.5"/><g clipPath="url(#sphere-clip)" stroke="#91b5d8" strokeOpacity=".14"><ellipse cx="180" cy="180" rx="42" ry="94"/><ellipse cx="180" cy="180" rx="73" ry="94"/><path d="M85 150h190M85 180h190M85 210h190M95 126h170M95 234h170"/></g><ellipse cx="180" cy="207" rx="164" ry="37" stroke="url(#station-metal)" strokeWidth="10"/><ellipse cx="180" cy="207" rx="164" ry="37" stroke="#83b5de" strokeOpacity=".4" strokeWidth="1"/><path d="M52 200v25m256-25v25" stroke="#6c9dc9" strokeWidth="5"/>{[52,110,180,250,308].map(x => <circle key={x} cx={x} cy={x === 180 ? 243 : 219} r="2" fill="#97dbff"/>)}</svg><div className="station-core-label"><span>API destination</span><strong>Gemini</strong></div><div className="scheduler-band">StarFlow scheduler</div><span className="station-caption">Guaranteed shares first.<br/>Unused capacity finds its next request.</span></div>
+import { memo, useEffect, useRef } from 'react'
+import { connectionColors } from './connectionGeometry'
+import StationDepthEffects from './StationDepthEffects'
+import StationCanvas from './StationCanvas'
+function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?: number }) {
+  const stageRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const stage = stageRef.current!
+    const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    const layers = stage.querySelectorAll<SVGSVGElement>('[data-depth-animation]')
+    let visible = true
+    const update = () => {
+      const active = live && visible && !document.hidden && !motion.matches
+      stage.dataset.effectsActive = String(active)
+      layers.forEach(layer => { if (active && stage.dataset.renderer !== '3d') layer.unpauseAnimations(); else layer.pauseAnimations() })
+    }
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update() })
+    const rendererObserver = new MutationObserver(update)
+    rendererObserver.observe(stage, { attributes: true, attributeFilter: ['data-renderer'] })
+    observer.observe(stage)
+    document.addEventListener('visibilitychange', update)
+    motion.addEventListener('change', update)
+    update()
+    return () => {
+      observer.disconnect()
+      rendererObserver.disconnect()
+      document.removeEventListener('visibilitychange', update)
+      motion.removeEventListener('change', update)
+      layers.forEach(layer => layer.pauseAnimations())
+    }
+  }, [live])
+  return <div className={`gemini-station ${live ? 'station-live' : ''}`}>
+    <div className="station-stage" ref={stageRef}>
+      <div className="station-depth-aura" aria-hidden="true"/>
+      <StationDepthEffects layer="rear"/>
+      <StationCanvas live={live} activeCount={activeCount}/>
+      <img className="station-render" src="/images/mission-station.png" width="1159" height="1357" alt="" decoding="async" fetchPriority="high"/>
+      <div className="station-energy" aria-hidden="true"/>
+      <div className="station-glass-light" aria-hidden="true"><i/></div>
+      <StationDepthEffects layer="front"/>
+      {connectionColors.slice(0,activeCount).map((color,index) => <span key={color} className={`station-inlet station-inlet-${index}`} data-station-port={index} style={{ color }} aria-hidden="true"/>)}
+      <div className="station-core-label"><strong>Gemini</strong></div>
+      <div className="scheduler-band">StarFlow scheduler</div>
+    </div>
+    <span className="station-caption">Guaranteed shares first. Unused capacity flows to agents that need it.</span>
+  </div>
 }
-
 export default memo(GeminiStation)

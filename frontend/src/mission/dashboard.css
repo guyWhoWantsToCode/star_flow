@@ -1,0 +1,90 @@
+/* Mission Control: measured connections and a physically lit central station. */
+.dashboard-screen{width:min(1580px,calc(100% - 64px));position:relative;isolation:isolate}
+.dashboard-screen .mission-header{margin-bottom:12px;min-height:100px;border:0}
+.mission-brand{display:flex;gap:15px;align-items:center;color:#f5f9ff;text-decoration:none;font-size:clamp(24px,2.2vw,36px);font-weight:600;letter-spacing:-1px;line-height:1.15}
+.mission-brand>svg{width:52px;height:62px;color:#25d6f3;filter:drop-shadow(0 0 12px #19c9ed55)}
+.mission-brand small{display:block;font-size:clamp(13px,1.3vw,21px);font-weight:400;letter-spacing:0;color:#93b4d0;margin-top:7px}
+.dashboard-screen .mission-indicators{gap:12px;align-self:flex-start;margin-top:24px}
+.dashboard-screen .mission-indicators>span,.dashboard-screen .mission-indicators>.mission-text-button{padding:10px 15px;min-height:42px;border:1px solid #365571;border-radius:12px;background:linear-gradient(135deg,#102338bd,#081321f0);box-shadow:inset 0 1px 0 #ffffff0a;font-size:12px}
+.dashboard-screen .connection-pill.is-live{border-color:#37c29a66;background:#082420b3;color:#c5f6e5}
+.dashboard-screen .connection-pill i{width:9px;height:9px;box-shadow:0 0 12px #35d69a66}
+.dashboard-screen .dashboard-intro{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;padding:0;margin:0}
+.dashboard-screen .orbital-console{height:clamp(620px,49vw,790px);margin:0 0 30px}
+.dashboard-screen .request-paths{display:block;height:100%;z-index:3;overflow:visible}
+.dashboard-screen .request-channel{opacity:.5;transition:opacity .3s}
+.dashboard-screen .channels-live .request-channel{opacity:1}
+.dashboard-screen .released-packet{filter:drop-shadow(0 0 5px currentColor)}
+.dashboard-screen .station-position{left:31%;top:0;width:38%;height:auto;display:block;z-index:2;animation:none}
+.station-stage{position:relative;width:100%;aspect-ratio:1159/1357}
+.station-render{display:block;width:100%;height:auto;position:relative;z-index:1}
+.station-energy{position:absolute;left:25%;top:29%;width:50%;height:44%;border-radius:50%;background:radial-gradient(ellipse at 50% 95%,#1badeb22,transparent 63%);z-index:2;pointer-events:none}
+.station-live .station-energy{animation:station-energy-light 5s ease-in-out infinite}
+.dashboard-screen .station-core-label{top:39%;left:20%;right:20%;z-index:3;pointer-events:none}
+.dashboard-screen .station-core-label strong{font-size:clamp(22px,3.1vw,48px);font-weight:550;letter-spacing:-1px;color:#f5faff;text-shadow:0 2px 4px #010816,0 0 17px #679df844}
+.dashboard-screen .scheduler-band{top:50.9%;height:7%;left:14%;right:14%;z-index:3;display:flex;align-items:center;justify-content:center;padding:0;background:none;font-size:clamp(10px,1.3vw,19px);font-weight:500;white-space:nowrap;color:#d6eaff;text-shadow:0 2px 5px #010610}
+.dashboard-screen .station-caption{width:180%;margin:11px 0 0 -40%;font-size:clamp(12px,1.05vw,16px);line-height:1.6;color:#a6bfd6}
+.station-inlet{position:absolute;width:16px;height:16px;border-radius:50%;z-index:4;pointer-events:none;background:radial-gradient(circle,#e5ffff 0%,currentColor 23%,transparent 70%);box-shadow:0 0 14px currentColor}
+.station-inlet-0{left:27%;top:43%}.station-inlet-1{right:27%;top:43%}.station-inlet-2{left:27%;top:67%}.station-inlet-3{right:27%;top:67%}
+.dashboard-screen .agent-module{width:25%;z-index:4;animation:none}
+.dashboard-screen .agent-chatbot,.dashboard-screen .agent-summarizer{top:13%}
+.dashboard-screen .agent-tagger,.dashboard-screen .agent-fourth{top:65%}
+.dashboard-screen .agent-module-heading{position:relative;min-height:102px;padding:17px 18px;gap:14px;border-radius:22px;border:1px solid color-mix(in srgb,var(--agent-color) 58%,#293f57);background:linear-gradient(145deg,#142b40f5,#091725f5 62%,#0b1d2cf5);box-shadow:inset 0 1px 1px #b9e3fa25,inset 0 -2px 8px #020711,0 0 22px color-mix(in srgb,var(--agent-color) 9%,transparent)}
+.dashboard-screen .agent-module-heading::before{content:'';position:absolute;inset:4px;border-radius:18px;border:1px solid color-mix(in srgb,var(--agent-color) 10%,transparent);pointer-events:none}
+.dashboard-screen .agent-icon{width:61px;height:66px;border-radius:17px;border-color:color-mix(in srgb,var(--agent-color) 75%,#2c435b);color:var(--agent-color);background:linear-gradient(135deg,color-mix(in srgb,var(--agent-color) 15%,#092131),#081322);box-shadow:inset 0 1px 1px #b2eaff30,0 0 12px color-mix(in srgb,var(--agent-color) 9%,transparent)}
+.dashboard-screen .agent-icon svg{width:35px;height:35px;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--agent-color) 35%,transparent))}
+.dashboard-screen .agent-module h2{font-size:clamp(14px,1.1vw,18px);font-weight:500;line-height:1.3;margin-bottom:10px}
+.dashboard-screen .agent-module-heading p{font-size:clamp(11px,1vw,15px)}
+.dashboard-screen .agent-module-heading p span{font-size:10px}
+.dashboard-screen .agent-status{font-size:10px;padding:6px 8px;border-radius:7px;margin-top:3px;background:#051c1977}
+.dashboard-screen .agent-status.rogue{background:#3c1c0bf0;border-color:#ff8a3d99;color:#ffd0a2}
+.agent-port{position:absolute;right:-16px;top:50%;transform:translateY(-50%);width:27px;height:48px;border-radius:5px 11px 11px 5px;z-index:-1;background:repeating-linear-gradient(90deg,transparent 0 4px,#ffffff15 4px 5px),linear-gradient(90deg,#1d3b52,currentColor 60%,#14263a);color:var(--agent-color);border:1px solid color-mix(in srgb,var(--agent-color) 65%,#39516a);box-shadow:0 0 14px color-mix(in srgb,var(--agent-color) 25%,transparent)}
+.agent-summarizer .agent-port,.agent-fourth .agent-port{left:-16px;right:auto;border-radius:11px 5px 5px 11px}
+.dashboard-screen .agent-statistics{margin-top:9px;border:1px solid #2c465f;padding:15px 8px 14px;border-radius:13px;background:linear-gradient(145deg,#081523f5,#040d19f5);box-shadow:inset 0 1px 0 #a4d7ff08}
+.dashboard-screen .agent-statistics dt{font-size:9px;color:#9db1c4;margin-bottom:10px}
+.dashboard-screen .agent-statistics dd{font-size:clamp(19px,1.6vw,25px)}
+.dashboard-screen .agent-queue{min-height:25px;color:#9baec2}
+.dashboard-screen .console-legend{font-size:10px;z-index:3;bottom:-10px}
+.dashboard-screen .dashboard-panels{animation:none;margin-top:40px}
+.dashboard-screen .mission-panel,.dashboard-screen .activity-panel{border-color:#2b455c;background:linear-gradient(145deg,#0b1b2be8,#050f1bef);border-radius:16px;box-shadow:inset 0 1px 0 #bcddff09}
+@keyframes station-energy-light{0%,100%{opacity:.45}50%{opacity:1}}
+@media(min-width:1700px){.dashboard-screen .orbital-console{height:820px}}
+@media(min-width:761px) and (max-width:1100px){.dashboard-screen{width:calc(100% - 40px)}.dashboard-screen .orbital-console{height:610px}.dashboard-screen .station-position{left:30%;width:40%;top:60px}.dashboard-screen .agent-module{width:27%}.dashboard-screen .agent-module-heading{gap:9px;min-height:94px;padding:12px;border-radius:17px}.dashboard-screen .agent-icon{width:41px;height:47px;border-radius:11px}.dashboard-screen .agent-icon svg{width:27px;height:27px}.dashboard-screen .agent-module h2{font-size:13px}.dashboard-screen .agent-status{font-size:8px;padding:5px}.dashboard-screen .agent-statistics dt{font-size:8px}.dashboard-screen .agent-chatbot,.dashboard-screen .agent-summarizer{top:18%}.dashboard-screen .agent-tagger,.dashboard-screen .agent-fourth{top:67%}.dashboard-screen .mission-indicators{gap:7px}.dashboard-screen .mission-indicators>span,.dashboard-screen .mission-indicators>.mission-text-button{font-size:10px;padding:8px 10px}}
+@media(max-width:760px){.dashboard-screen{width:calc(100% - 32px)}.dashboard-screen .mission-header{min-height:94px;margin-bottom:10px;gap:14px}.mission-brand{gap:8px;font-size:24px}.mission-brand>svg{width:33px;height:43px}.mission-brand small{font-size:12px;margin-top:4px}.dashboard-screen .mission-indicators{margin-top:0;gap:6px;max-width:175px}.dashboard-screen .mission-indicators>span,.dashboard-screen .mission-indicators>.mission-text-button{font-size:9px;min-height:28px;padding:5px 7px;border-radius:7px}.dashboard-screen .mission-indicators .mission-text-button{width:auto}.dashboard-screen .orbital-console{height:auto;display:flex;flex-direction:column;gap:22px}.dashboard-screen .station-position{position:relative;left:auto;top:auto;width:min(330px,90%);margin:0 auto 50px;order:0}.dashboard-screen .station-caption{width:110%;margin:10px 0 0 -5%;font-size:12px}.dashboard-screen .station-core-label strong{font-size:29px}.dashboard-screen .scheduler-band{font-size:12px}.dashboard-screen .agent-module{position:relative;width:100%;top:auto;left:auto;right:auto}.dashboard-screen .agent-module-heading{min-height:91px}.dashboard-screen .agent-module h2{font-size:17px}.dashboard-screen .agent-icon{width:51px;height:56px}.dashboard-screen .agent-icon svg{width:30px;height:30px}.dashboard-screen .agent-statistics dt{font-size:10px}.dashboard-screen .agent-module-heading p span{display:inline}.dashboard-screen .agent-status{font-size:10px}.dashboard-screen .agent-port{left:50%;right:auto;top:-12px;transform:translateX(-50%);width:34px;height:24px;border-radius:9px 9px 3px 3px}.station-inlet-0{left:35%;top:74%;right:auto}.station-inlet-1{left:45%;top:74%;right:auto}.station-inlet-2{left:55%;top:74%;right:auto}.station-inlet-3{left:65%;top:74%;right:auto}.dashboard-screen .request-paths{position:absolute;inset:0;display:block;opacity:.7}.dashboard-screen .console-legend{position:relative;bottom:auto;margin-top:4px}.dashboard-screen .dashboard-panels{margin-top:30px}.dashboard-screen .station-core-label{top:39%}}
+@media(prefers-reduced-motion:reduce){.station-energy{animation:none!important}.dashboard-screen .released-packet{display:none}}
+
+/* Projected front/rear orbits and moving light give the drifting station dimensional depth. */
+.station-stage { isolation: isolate; }
+.station-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0; }
+.station-stage[data-renderer='3d'] .station-canvas { opacity: 1; }
+.station-stage[data-renderer='3d'] .station-render { z-index: 2; mask-image: url('/images/station-frame-mask.svg'); mask-size: 100% 100%; mask-repeat: no-repeat; }
+.station-stage[data-renderer='3d'] :is(.station-depth-orbit,.station-energy,.station-glass-light) { display: none; }
+.station-depth-aura {
+  position: absolute; inset: 11% -8% 8%; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 44% 45%, #3ab3f017, transparent 58%), radial-gradient(ellipse at 69% 58%, #9661da12, transparent 51%);
+  animation: station-aura-depth 8s ease-in-out infinite;
+}
+.station-depth-orbit { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.station-depth-rear { z-index: 0; opacity: .75; }
+.station-depth-front { z-index: 2; }
+.station-render { filter: drop-shadow(0 10px 15px #02071288); }
+.station-rim-scan { animation: station-rim-travel 28s linear infinite; }
+.station-rim-counter { animation-duration: 38s; animation-direction: reverse; }
+.station-glass-light { position: absolute; left: 25%; top: 29%; width: 50%; height: 44%; z-index: 2; border-radius: 50%; overflow: hidden; pointer-events: none; }
+.station-glass-light i {
+  display: block; width: 100%; height: 100%; opacity: 0;
+  background: linear-gradient(105deg, transparent 33%, #c3eaff08 43%, #eaf8ff19 49%, #c3eaff08 55%, transparent 64%);
+  animation: station-glass-reflection 16s ease-in-out infinite;
+}
+.station-stage[data-effects-active='false'] :is(.station-depth-aura,.station-rim-scan,.station-glass-light i,.station-energy) { animation-play-state: paused; }
+@keyframes station-rim-travel { to { stroke-dashoffset: -3140; } }
+@keyframes station-aura-depth { 0%,100% { opacity: .5; transform: scale(.97); } 50% { opacity: 1; transform: scale(1.02); } }
+@keyframes station-glass-reflection {
+  0%,15% { opacity: 0; transform: translateX(-110%); }
+  25%,48% { opacity: .85; }
+  62%,100% { opacity: 0; transform: translateX(110%); }
+}
+@media(max-width:760px) { .station-rim-counter { display: none; } .station-glass-light i { opacity: .6; } }
+@media(prefers-reduced-motion:reduce) {
+  .station-depth-aura,.station-rim-scan,.station-glass-light i { animation: none!important; }
+  .station-glass-light { display: none; }
+}

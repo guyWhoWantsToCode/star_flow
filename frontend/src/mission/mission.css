@@ -56,3 +56,108 @@
 .additional-agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:20px}.additional-agents:empty{display:none}.additional-agents .agent-module{position:static;width:100%}
 
 .catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.catalog-grid .selection-card{padding:20px;text-align:left}.catalog-grid .selection-card-top{margin-bottom:20px}.catalog-grid .selection-card>strong{font-size:17px;line-height:1.4}.catalog-grid .catalog-agent-id{min-height:0;margin-top:7px;color:#7e97b0;font-size:11px}.catalog-grid .selection-card small{margin-top:18px}.catalog-grid .selection-card:disabled{cursor:default}.catalog-grid .selection-card:disabled:not(.is-selected){opacity:.48}.catalog-toolbar{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;color:#94afc9;font-size:12px}.catalog-start{position:sticky;bottom:20px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px;margin-top:24px;background:#0a1525f5;border:1px solid #46617c;border-radius:8px;backdrop-filter:blur(16px);text-align:left}.catalog-start strong{font-size:15px;font-weight:500}.catalog-start p{color:#92aac1;font-size:11px;line-height:1.7;margin-top:8px}.catalog-start .mission-button{flex-shrink:0}.catalog-start button:disabled{opacity:.5;cursor:not-allowed}@media(max-width:1000px){.catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-grid .selection-card{padding:15px}.catalog-grid .selection-card>strong{font-size:14px}.catalog-start{flex-direction:column;align-items:stretch;bottom:10px;padding:16px}.catalog-start .mission-button{justify-content:center}.catalog-toolbar{font-size:10px}}
+
+/* Unique service scenes, sharing a quiet material and lighting treatment. */
+.setup-screen .setup-main{max-width:1200px}
+.catalog-grid .selection-card{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;min-height:330px;padding:20px;background:linear-gradient(145deg,color-mix(in srgb,var(--agent-color) 8%,#0b1220),#080f1dee);border-color:color-mix(in srgb,var(--agent-color) 24%,#203047);border-radius:12px;box-shadow:inset 0 1px 0 #ffffff07}
+.catalog-grid .selection-card::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 75% 75%,color-mix(in srgb,var(--agent-color) 13%,transparent),transparent 65%);opacity:.65;transition:opacity 240ms}
+.catalog-grid .selection-card-top{margin-bottom:18px;align-items:center}
+.catalog-grid .selection-card .agent-icon{width:34px;height:34px;border-radius:9px;background:color-mix(in srgb,var(--agent-color) 8%,#0b1422)}
+.catalog-grid .selection-card .agent-icon svg{width:20px;height:20px}
+.catalog-grid .selection-card>strong{font-size:16px;line-height:1.4;margin:0 0 8px;letter-spacing:-.25px}
+.catalog-grid .selection-card .catalog-agent-description{font-size:11px;line-height:1.65;min-height:36px;color:#a3b4c9;max-width:100%}
+.catalog-scene{display:block;width:calc(100% + 18px);height:auto;aspect-ratio:240/150;margin:4px -9px 0;color:var(--agent-color);flex:1;min-height:125px;max-height:165px;overflow:visible}
+.catalog-grid .selection-card small{display:block;margin-top:auto;padding-top:10px;color:#869bb0;font-size:10px;letter-spacing:.1px}
+.catalog-grid .selection-card .selection-check{width:24px;height:24px;background:#070d1780}
+.catalog-grid .selection-card.is-selected{border-color:color-mix(in srgb,var(--agent-color) 70%,#23364c);background:linear-gradient(145deg,color-mix(in srgb,var(--agent-color) 15%,#0b1422),#0a1421);box-shadow:0 0 20px color-mix(in srgb,var(--agent-color) 10%,transparent),inset 0 1px 0 color-mix(in srgb,var(--agent-color) 20%,transparent)}
+.catalog-grid .selection-card.is-selected::before{opacity:1}
+.catalog-grid .selection-card.is-selected small{color:var(--agent-color)}
+.catalog-grid .selection-card.is-selected .selection-check{color:#06111b;background:var(--agent-color);border-color:var(--agent-color)}
+.catalog-grid .selection-card:disabled:not(.is-selected){opacity:.65}
+.catalog-grid .selection-card:hover:enabled{background:linear-gradient(145deg,color-mix(in srgb,var(--agent-color) 12%,#0b1422),#0a1421);transform:translateY(-3px);border-color:color-mix(in srgb,var(--agent-color) 70%,#23364c)}
+.catalog-grid .selection-card:focus-visible{outline:2px solid var(--agent-color);outline-offset:4px}
+.catalog-scene .space-orbit,.catalog-scene .space-vortex{transform-box:view-box;transform-origin:120px 75px;animation:catalog-orbit var(--scene-cycle,12s) linear infinite}
+.catalog-scene .space-vortex{transform-origin:120px 72px;animation-duration:11s}
+.catalog-scene .space-float{animation:catalog-float 4.8s ease-in-out infinite}
+.catalog-scene .space-pulse,.catalog-scene .space-twinkle{animation:catalog-light 3.6s ease-in-out infinite}
+.catalog-scene .space-signal{animation:catalog-signal 3.2s ease-in-out infinite}
+.catalog-scene .space-wave{animation:catalog-wave 4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.catalog-scene .space-stream{animation:catalog-stream 3.5s linear infinite}
+.catalog-scene .space-launch{animation:catalog-liftoff 5s ease-in-out infinite}
+.catalog-scene .space-comet{animation:catalog-comet 5.5s ease-in-out infinite}
+.catalog-scene .space-phase-1{animation-delay:-1.6s}.catalog-scene .space-phase-2{animation-delay:-3.2s}
+.catalog-scene.scene-translate .space-orbit{animation-direction:reverse}.catalog-scene.scene-triage .space-orbit{animation-duration:15s}.catalog-scene.scene-invoice .space-orbit{animation-duration:18s}.catalog-scene.scene-resume .space-orbit{animation-duration:9s}.catalog-scene.scene-lead .space-orbit{animation-direction:reverse;animation-duration:13s}
+.catalog-scene.scene-caption .space-float{animation-duration:5.5s}.catalog-scene.scene-changelog .space-float{animation-duration:5s}.catalog-scene.scene-notes .space-twinkle{animation-duration:4.5s}.catalog-scene.scene-tagger .space-pulse{animation-duration:3.6s}.catalog-scene.scene-fraud .space-stream{animation-duration:3.8s}.catalog-scene.scene-sentiment .space-wave{animation-duration:3.6s}.catalog-scene.scene-chatbot .space-float{animation-duration:4.4s}
+.catalog-scene :is(.space-orbit,.space-vortex,.space-float,.space-pulse,.space-twinkle,.space-signal,.space-wave,.space-stream,.space-launch,.space-comet){animation-play-state:running}
+.selection-card[data-art-visible='false'] .catalog-scene *{animation-play-state:paused}
+.catalog-grid[data-page-hidden='true'] .catalog-scene *,.is-initializing .catalog-scene *{animation-play-state:paused}
+@keyframes catalog-orbit{to{transform:rotate(360deg)}}
+@keyframes catalog-float{0%,100%{transform:translateY(3px)}50%{transform:translateY(-6px)}}
+@keyframes catalog-light{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes catalog-signal{0%,100%{opacity:.25}45%,65%{opacity:.9}}
+@keyframes catalog-wave{0%,100%{transform:scaleY(.82);opacity:.6}50%{transform:scaleY(1.14);opacity:1}}
+@keyframes catalog-stream{to{stroke-dashoffset:-60}}
+@keyframes catalog-liftoff{0%,100%{transform:translateY(3px)}50%{transform:translateY(-8px)}}
+@keyframes catalog-comet{0%,100%{transform:translate(5px,-4px);opacity:.7}50%{transform:translate(-6px,4px);opacity:1}}
+@media(max-width:760px){.catalog-grid .selection-card{min-height:295px;padding:15px;border-radius:10px}.catalog-grid .selection-card>strong{font-size:14px}.catalog-grid .selection-card .catalog-agent-description{font-size:10px;min-height:48px}.catalog-scene{min-height:100px}.catalog-grid .selection-card-top{margin-bottom:14px}}
+@media(max-width:380px){.catalog-grid{grid-template-columns:1fr}.catalog-grid .selection-card{min-height:290px}.catalog-scene{max-height:150px}.catalog-grid .selection-card .catalog-agent-description{min-height:0}}
+@media(prefers-reduced-motion:reduce){.catalog-scene *{animation:none!important}.catalog-grid .selection-card:hover:enabled{transform:none}}
+
+/* Ring shimmer and constellation signals have visible motion as well as changing light. */
+.catalog-scene.scene-rerank .space-pulse{transform-box:fill-box;transform-origin:center;animation-name:catalog-ring-light}
+.catalog-scene.scene-notes .space-twinkle circle,.catalog-scene.scene-tagger .space-pulse circle{transform-box:fill-box;transform-origin:center;animation:catalog-star-light 3.8s ease-in-out infinite}
+.catalog-scene.scene-notes .space-twinkle circle:nth-child(2n),.catalog-scene.scene-tagger .space-pulse circle:nth-child(2n){animation-delay:-1.3s}
+.catalog-scene.scene-notes .space-twinkle circle:nth-child(3n),.catalog-scene.scene-tagger .space-pulse circle:nth-child(3n){animation-delay:-2.6s}
+@keyframes catalog-ring-light{0%,100%{transform:scale(.92);opacity:.4}50%{transform:scale(1.05);opacity:1}}
+@keyframes catalog-star-light{0%,100%{transform:scale(.75);opacity:.5}50%{transform:scale(1.35);opacity:1}}
+.selection-card[data-art-visible='false'] .catalog-scene *,.catalog-grid[data-page-hidden='true'] .catalog-scene *,.is-initializing .catalog-scene *{animation-play-state:paused}
+
+/* Double speed for the requested services, preserving each scene’s rhythm. */
+.catalog-scene.scene-chatbot .space-float{animation-duration:2.2s}
+.catalog-scene.scene-chatbot .space-pulse{animation-duration:1.8s}
+.catalog-scene.scene-rerank .space-pulse{animation-duration:1.8s}
+.catalog-scene.scene-rerank .space-float{animation-duration:2.4s}
+.catalog-scene.scene-fraud .space-pulse{animation-duration:1.8s}
+.catalog-scene.scene-fraud .space-stream{animation-duration:1.9s}
+.catalog-scene.scene-onboard .space-launch{animation-duration:2.5s}
+.catalog-scene.scene-onboard .space-pulse{animation-duration:1.8s}
+.catalog-scene.scene-alerts .space-float{animation-duration:2.4s}
+.catalog-scene.scene-alerts .space-signal{animation-duration:1.6s}
+.catalog-scene.scene-summarizer .space-comet{animation-duration:2.75s}
+.catalog-scene.scene-summarizer .space-float{animation-duration:2.4s}
+.catalog-scene.scene-invoice .space-orbit{animation-duration:9s}
+.catalog-scene.scene-invoice .space-float{animation-duration:2.4s}
+.catalog-scene.scene-caption .space-float{animation-duration:2.75s}
+.catalog-scene.scene-caption .space-signal{animation-duration:1.6s}
+.catalog-scene.scene-sentiment .space-wave{animation-duration:1.8s}
+.catalog-scene.scene-review .space-float{animation-duration:2.4s}
+.catalog-scene.scene-review .space-stream{animation-duration:1.75s}
+.catalog-scene.scene-changelog .space-float{animation-duration:2.5s}
+.catalog-scene.scene-changelog .space-pulse{animation-duration:1.8s}
+.catalog-scene.scene-rerank .space-phase-1{animation-delay:-.8s}
+.catalog-scene.scene-rerank .space-phase-2{animation-delay:-1.6s}
+
+/* Threefold increase from the earlier speeds for these nine services. */
+.catalog-scene.scene-chatbot .space-float{animation-duration:0.733333s}
+.catalog-scene.scene-chatbot .space-pulse{animation-duration:0.6s}
+.catalog-scene.scene-rerank .space-pulse{animation-duration:0.6s}
+.catalog-scene.scene-rerank .space-float{animation-duration:0.8s}
+.catalog-scene.scene-onboard .space-launch{animation-duration:0.833333s}
+.catalog-scene.scene-onboard .space-pulse{animation-duration:0.6s}
+.catalog-scene.scene-alerts .space-float{animation-duration:0.8s}
+.catalog-scene.scene-alerts .space-signal{animation-duration:0.533333s}
+.catalog-scene.scene-summarizer .space-comet{animation-duration:0.916667s}
+.catalog-scene.scene-summarizer .space-float{animation-duration:0.8s}
+.catalog-scene.scene-notes .space-stream{animation-duration:1.16667s}
+.catalog-scene.scene-notes .space-twinkle{animation-duration:1.5s}
+.catalog-scene.scene-caption .space-float{animation-duration:0.916667s}
+.catalog-scene.scene-caption .space-signal{animation-duration:0.533333s}
+.catalog-scene.scene-review .space-float{animation-duration:0.8s}
+.catalog-scene.scene-review .space-stream{animation-duration:0.583333s}
+.catalog-scene.scene-changelog .space-float{animation-duration:0.833333s}
+.catalog-scene.scene-changelog .space-pulse{animation-duration:0.6s}
+ .catalog-scene.scene-rerank .space-phase-1{animation-delay:-0.266667s}
+.catalog-scene.scene-rerank .space-phase-2{animation-delay:-0.533333s}
+.catalog-scene.scene-notes .space-twinkle circle{animation-duration:1.26667s}
+.catalog-scene.scene-notes .space-twinkle circle:nth-child(2n){animation-delay:-0.433333s}
+.catalog-scene.scene-notes .space-twinkle circle:nth-child(3n){animation-delay:-0.866667s}
