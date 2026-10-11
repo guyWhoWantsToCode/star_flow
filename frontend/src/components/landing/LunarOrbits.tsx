@@ -68,6 +68,7 @@ function LunarOrbits({ mission = false }: { mission?: boolean }) {
     let visible = true
     let frame = 0
     let previous = 0
+    let lastDraw = 0
     let elapsed = 0
     let scrollFrame = 0
     function followScroll() {
@@ -110,12 +111,17 @@ function LunarOrbits({ mission = false }: { mission?: boolean }) {
       if (!visible || document.hidden || motion.matches) return
       if (previous) elapsed += Math.min((time - previous) / 1000, 0.1)
       previous = time
-      render()
+      const interval = 1000 / 60
+      if (!lastDraw || time - lastDraw >= interval - .5) {
+        lastDraw = time - ((time - lastDraw) % interval)
+        render()
+      }
       frame = requestAnimationFrame(tick)
     }
     function update() {
       cancelAnimationFrame(frame)
       previous = 0
+      lastDraw = 0
       render()
       if (visible && !document.hidden && !motion.matches) frame = requestAnimationFrame(tick)
     }

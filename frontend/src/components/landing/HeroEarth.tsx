@@ -66,20 +66,27 @@ export default function HeroEarth() {
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
     const rotation = gl.getUniformLocation(program,'rotation')
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
-    let frame=0, angle=.15, previous=0, visible=true, ready=false, disposed=false
+    let frame=0, angle=.15, previous=0, lastDraw=0, visible=true, ready=false, disposed=false
     const draw = () => { gl.uniform1f(rotation,angle); gl.drawArrays(gl.TRIANGLES,0,6) }
     const tick = (time: number) => {
       if(previous) angle+=Math.min(time-previous,100)/45000
-      previous=time; draw(); frame=requestAnimationFrame(tick)
+      previous=time
+      const interval = 1000 / 60
+      if (!lastDraw || time-lastDraw >= interval-.5) {
+        lastDraw = time - ((time-lastDraw) % interval)
+        draw()
+      }
+      frame=requestAnimationFrame(tick)
     }
     const update = () => {
-      cancelAnimationFrame(frame); previous=0
+      cancelAnimationFrame(frame); previous=0; lastDraw=0
       if(!ready || disposed) return
       draw()
       if(visible && !document.hidden && !motion.matches) frame=requestAnimationFrame(tick)
     }
     const resize = () => {
       const size=Math.min(1200,Math.round(canvas.clientWidth*Math.min(devicePixelRatio || 1,1.5)))
+      if(canvas.width===size && canvas.height===size) return
       canvas.width=canvas.height=size; gl.viewport(0,0,size,size); update()
     }
     const image = new Image()

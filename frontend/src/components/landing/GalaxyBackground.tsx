@@ -91,6 +91,7 @@ function GalaxyBackground() {
     let angle = 0
     let frame = 0
     let lastTime = 0
+    let lastDraw = 0
     let inView = true
     let starLayers: { path: Path2D; opacity: number }[] = []
     const random = randomSource(9127)
@@ -121,9 +122,11 @@ function GalaxyBackground() {
       frame = 0
       if (motion.matches || !inView || document.hidden) return
       if (!lastTime) lastTime = time
-      if (time - lastTime >= 1000 / (mobile ? 30 : 60) - 0.75) {
-        angle += Math.min((time - lastTime) / 1000, 0.1) * 0.075
-        lastTime = time
+      angle += Math.min((time - lastTime) / 1000, 0.1) * 0.075
+      lastTime = time
+      const interval = 1000 / (mobile ? 30 : 60)
+      if (!lastDraw || time - lastDraw >= interval - 0.75) {
+        lastDraw = time - ((time - lastDraw) % interval)
         draw()
       }
       frame = requestAnimationFrame(tick)
@@ -132,6 +135,7 @@ function GalaxyBackground() {
     function updateAnimation() {
       cancelAnimationFrame(frame)
       lastTime = 0
+      lastDraw = 0
       draw()
       if (!motion.matches && inView && !document.hidden) frame = requestAnimationFrame(tick)
     }

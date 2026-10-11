@@ -303,7 +303,8 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
     if (lastTime) elapsed += Math.min((time-lastTime)/1000,.05)
     lastTime = time
     if (time-lastDraw < 1000/(compact.matches ? 30 : 60)-.6) return
-    lastDraw = time; draw()
+    const interval = 1000/(compact.matches ? 30 : 60)
+    lastDraw = time - ((time-lastDraw) % interval); draw()
   }
   const update = () => {
     cancelAnimationFrame(frame); lastTime = 0; lastDraw = 0
