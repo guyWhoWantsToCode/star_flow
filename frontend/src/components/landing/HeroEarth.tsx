@@ -69,7 +69,7 @@ export default function HeroEarth() {
     let frame=0, angle=.15, previous=0, visible=true, ready=false, disposed=false
     const draw = () => { gl.uniform1f(rotation,angle); gl.drawArrays(gl.TRIANGLES,0,6) }
     const tick = (time: number) => {
-      if(previous) angle+=Math.min(time-previous,100)/90000
+      if(previous) angle+=Math.min(time-previous,100)/45000
       previous=time; draw(); frame=requestAnimationFrame(tick)
     }
     const update = () => {

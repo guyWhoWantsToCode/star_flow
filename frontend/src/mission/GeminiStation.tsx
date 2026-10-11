@@ -35,8 +35,7 @@ function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?:
       <div className="station-depth-aura" aria-hidden="true"/>
       <StationDepthEffects layer="rear"/>
       <StationCanvas live={live} activeCount={activeCount} onRendererChange={setRenderer}/>
-      {renderer === 'fallback' && <img className="station-render" src="/images/mission-station-current.png" width="1159" height="1357" alt="" decoding="async"/>}
-      {renderer === 'loading' && <div className="station-loading" aria-hidden="true"><i/><i/><i/></div>}
+      {renderer !== '3d' && <img className={`station-render ${renderer === 'loading' ? 'station-preview' : ''}`} src="/images/mission-station-current.png" width="1159" height="1357" alt="" decoding="async" fetchPriority="high"/>}
       <div className="station-energy" aria-hidden="true"/>
       <div className="station-glass-light" aria-hidden="true"><i/></div>
       <StationDepthEffects layer="front"/>

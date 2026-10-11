@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef } from 'react'
 import type { StationScene } from './stationScene'
+import { loadStationScene } from './preloadStation'
 
 export type StationRenderer = 'loading' | '3d' | 'fallback'
 
@@ -20,8 +21,8 @@ function StationCanvas({ live, activeCount, onRendererChange }: {
     let disposed = false
     onRendererChange('loading')
     const fallback = () => { if (!disposed) onRendererChange('fallback') }
-    // Load the renderer only on Mission Control, leaving the landing page light.
-    void import('./stationScene').then(({ createStationScene }) => {
+    // Reuse the renderer download started during agent selection.
+    void loadStationScene().then(({ createStationScene }) => {
       if (disposed) return
       sceneRef.current = createStationScene(canvas, {
         onReady: () => { if (!disposed) onRendererChange('3d') },

@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState, type CSSProperties } from 'react'
 import AgentSpaceArt from './AgentSpaceArt'
+import { preloadStation } from './preloadStation'
 import { spaceThemes } from './spaceThemes'
 import { Brand, OrbitLogo } from '../components/landing/Brand'
 import { agentStyle } from './agents'
@@ -13,6 +14,7 @@ function AgentSelection({ status, error, initializing, onPower, onRetry, onReset
   const [loading, setLoading] = useState(true)
   const [attempt, setAttempt] = useState(0)
   const [selected, setSelected] = useState<AgentId[]>([])
+  useEffect(() => { preloadStation() }, [])
   useEffect(() => {
     const abort = new AbortController()
     async function load() {
