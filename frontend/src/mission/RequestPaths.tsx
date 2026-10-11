@@ -56,12 +56,15 @@ export default function RequestPaths({ snapshot, live, consoleRef }: { snapshot:
     const schedule = () => { if (!disposed && !frame) frame = requestAnimationFrame(measure) }
     const observer = new ResizeObserver(schedule)
     observer.observe(console)
-    console.querySelectorAll('.agent-module-heading, .station-stage').forEach(element => observer.observe(element))
+    console.querySelectorAll('.agent-module-heading, .station-stage, [data-agent-port], [data-station-port]').forEach(element => observer.observe(element))
+    const rendererObserver = new MutationObserver(schedule)
+    const stage = console.querySelector('.station-stage')
+    if (stage) rendererObserver.observe(stage, { attributes: true, attributeFilter: ['data-renderer'] })
     window.addEventListener('resize', schedule)
     void document.fonts.ready.then(schedule)
     // Geometry synchronizes the rendered docking ports with their SVG connections.
     measure()
-    return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('resize',schedule) }
+    return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); rendererObserver.disconnect(); window.removeEventListener('resize',schedule) }
   }, [ids, consoleRef])
   useLayoutEffect(() => {
     const stage = consoleRef.current?.querySelector<HTMLElement>('.station-stage')
@@ -140,7 +143,7 @@ export default function RequestPaths({ snapshot, live, consoleRef }: { snapshot:
       <linearGradient id={`${uid}-tube-${index}`} x1="0" y1="0" x2="0" y2="1"><stop stopColor={route.color} stopOpacity=".7"/><stop offset=".3" stopColor={route.color} stopOpacity=".15"/><stop offset=".65" stopColor={route.color} stopOpacity=".3"/><stop offset="1" stopColor={route.color} stopOpacity=".85"/></linearGradient>
       <marker id={`${uid}-arrow-${index}`} viewBox="0 0 18 18" refX="14" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 3L10 3L10 0L18 9L10 18L10 15L1 15Z" fill={route.color}/></marker>
     </g>)}</defs>
-    {geometry.routes.map((route,index) => <g key={route.id} className="request-channel" style={{ color: route.color }}>
+    {geometry.routes.map((route,index) => <g key={route.id} className="request-channel" style={{ color: route.color }} strokeLinecap="round">
       <use href={`#${uid}-route-${index}`} stroke="currentColor" strokeWidth="28" strokeOpacity=".05" fill="none"/>
       <use href={`#${uid}-route-${index}`} stroke="currentColor" strokeWidth="21" strokeOpacity=".12" fill="none"/>
       <use href={`#${uid}-route-${index}`} stroke="#081423" strokeWidth="16" fill="none"/>

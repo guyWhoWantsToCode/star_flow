@@ -1,5 +1,19 @@
 # Mission Control assets
 
+## Live 3D station
+
+The Mission Control station now renders real geometry with Three.js: a bevelled titanium outer ring, counter-rotating calibration ring, clear-coated rotating core, equatorial docking mechanism, and two rotating sensor masts. All labels and live connection paths remain HTML/SVG. The original transparent station image is preserved as a fallback when WebGL, shaders or the new texture are unavailable. The shared landing-page galaxy and Earth backgrounds are unchanged.
+
+- New asset: `frontend/public/images/station-metal-v2.jpg`, 2172 × 724, JPEG quality 90. Used as the metal color and subtle bump map.
+- Generation mode: built-in image-generation tool; no API/CLI fallback.
+- Original generated file: `/Users/nihar/.codex/generated_images/01a12753-77dc-7e60-aca3-3dc8618b19fd/exec-1b7be9b9-d80b-43ae-bf81-6194355ff672.png`.
+- The native renderer loads only on Mission Control, limits device resolution, pauses offscreen/when hidden, and respects reduced motion.
+
+### Metal surface prompt
+
+Use case: product-mockup. Asset type: realistic metal surface texture for a live 3D orbital station's rotating mechanical rings in a StarFlow web dashboard. Generate a single wide 3:1 rectangular full-bleed texture atlas, approximately 1536 x 512 or higher. This is a FLAT material/albedo surface, front-on orthographic with no perspective, not an illustration of a space station. Brushed dark titanium and cool silver aerospace panels: a repeating sequence of 12 finely engineered rectangular panels, hairline grooves, inset narrow vents, subtle milled machining marks, tiny recessed fasteners, charcoal gasket seams, restrained natural weathering and varied roughness. Top and bottom edges have narrow continuous brushed-silver trim strips; across middle some panels have slender inset blue-cyan luminous indicator slots, sparse and restrained. High fidelity realistic film prop material, sharp detailed texture, convincing hand-designed hardware. Neutral soft diffuse illumination, no deep cast shadows, no intense specular highlights baked in. Seamless left/right boundary, full rectangular coverage with no background and no empty margins. No text, no logos, no UI, no rings pictured, no stars, no emissive bloom, no watermark.
+
+
 Generated with the built-in image generation tool, then copied into this project. The station retains its transparent alpha channel. The backdrop was encoded as JPEG with macOS sips at quality 88. All dashboard labels and live values are rendered by the frontend, not baked into these images.
 
 - `mission-station.png`: transparent station, 1159 × 1357.

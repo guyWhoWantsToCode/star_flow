@@ -1,5 +1,5 @@
-import { memo, useEffect, useRef } from 'react'
-import { connectionColors } from './connectionGeometry'
+import { memo, useEffect, useRef, type CSSProperties } from 'react'
+import { connectionColors, stationDockAnchor } from './connectionGeometry'
 import StationDepthEffects from './StationDepthEffects'
 import StationCanvas from './StationCanvas'
 function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?: number }) {
@@ -38,7 +38,14 @@ function GeminiStation({ live, activeCount = 3 }: { live: boolean; activeCount?:
       <div className="station-energy" aria-hidden="true"/>
       <div className="station-glass-light" aria-hidden="true"><i/></div>
       <StationDepthEffects layer="front"/>
-      {connectionColors.slice(0,activeCount).map((color,index) => <span key={color} className={`station-inlet station-inlet-${index}`} data-station-port={index} style={{ color }} aria-hidden="true"/>)}
+      {connectionColors.slice(0,activeCount).map((color,index) => {
+        const desktop = stationDockAnchor(index), mobile = stationDockAnchor(index,true)
+        const style = {
+          color, '--dock-x': `${desktop.x*100}%`, '--dock-y': `${desktop.y*100}%`,
+          '--dock-mobile-x': `${mobile.x*100}%`, '--dock-mobile-y': `${mobile.y*100}%`,
+        } as CSSProperties
+        return <span key={color} className={`station-inlet station-inlet-${index}`} data-station-port={index} style={style} aria-hidden="true"/>
+      })}
       <div className="station-core-label"><strong>Gemini</strong></div>
       <div className="scheduler-band">StarFlow scheduler</div>
     </div>

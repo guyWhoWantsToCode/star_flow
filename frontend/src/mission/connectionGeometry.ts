@@ -1,6 +1,16 @@
 export type Point = { x: number; y: number }
 export const connectionColors = ['#2bddf3', '#bd83ff', '#339cff', '#ffbd72'] as const
 
+// Shared by the SVG docking anchors and the orthographic 3D camera.
+export const stationGeometry = { width: 11.59, height: 13.57, ringY: -.24, dockingRadius: 4.97 } as const
+export function stationDockAnchor(slot: number, compact = false): Point {
+  const angles = compact ? [249,263,277,291] : [167,13,199,341]
+  const angle = angles[slot] * Math.PI / 180
+  const x = Math.cos(angle) * stationGeometry.dockingRadius
+  const y = Math.sin(angle) * stationGeometry.dockingRadius + stationGeometry.ringY
+  return { x: x / stationGeometry.width + .5, y: .5 - y / stationGeometry.height }
+}
+
 // A small closed orbit starts at the original position, avoiding a jump on load.
 export function stationDrift(elapsedMs: number): Point {
   const phase = elapsedMs / 10500 * Math.PI * 2

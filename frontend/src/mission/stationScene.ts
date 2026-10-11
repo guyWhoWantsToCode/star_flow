@@ -8,13 +8,13 @@ import {
   type BufferGeometry,
 } from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
-import { connectionColors } from './connectionGeometry'
+import { connectionColors, stationGeometry } from './connectionGeometry'
 
 export type StationScene = { setStatus: (live: boolean, activeCount: number) => void; dispose: () => void }
 type Callbacks = { onReady: () => void; onFailure: () => void }
 
 // Coordinates match the original transparent station plate and its HTML labels.
-const WORLD_WIDTH = 11.59, WORLD_HEIGHT = 13.57
+const WORLD_WIDTH = stationGeometry.width, WORLD_HEIGHT = stationGeometry.height
 
 function coreSurface() {
   const canvas = document.createElement('canvas')
@@ -53,6 +53,8 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
   renderer.outputColorSpace = SRGBColorSpace
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.15
+  let shaderFailed = false
+  renderer.debug.onShaderError = () => { shaderFailed = true }
   const scene = new Scene()
   const camera = new OrthographicCamera(-WORLD_WIDTH/2,WORLD_WIDTH/2,WORLD_HEIGHT/2,-WORLD_HEIGHT/2,.1,60)
   camera.position.z = 20
@@ -68,12 +70,16 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
     const object = new Mesh(shape,surface); parent.add(object); return object
   }
 
-  const room = new RoomEnvironment()
-  const pmrem = new PMREMGenerator(renderer)
-  const environment = pmrem.fromScene(room,.035)
+  const createEnvironment = () => {
+    const room = new RoomEnvironment()
+    const pmrem = new PMREMGenerator(renderer)
+    const environment = pmrem.fromScene(room,.035)
+    room.dispose(); pmrem.dispose()
+    return environment
+  }
+  let environment = createEnvironment()
   scene.environment = environment.texture
   scene.environmentIntensity = .7
-  room.dispose(); pmrem.dispose()
   scene.add(new HemisphereLight('#c0dbea','#081323',1.2))
   const softbox = new DirectionalLight('#e3eef5',2.5)
   softbox.position.set(-5,7,9); scene.add(softbox)
@@ -90,8 +96,11 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
     [5.22,.14],[5.12,.24],[4.76,.24],[4.72,.13],[4.72,-.13],
   ].map(([radius,depth]) => new Vector2(radius,depth))
   const annulus = geometry(new LatheGeometry(ringProfile,192))
+  // Cover the face with the full panel strip, rather than a thin slice of the atlas.
+  const uv = annulus.getAttribute('uv')
+  for (let index=0; index<uv.count; index++) uv.setY(index,(ringProfile[index%ringProfile.length].x-4.72)/.5)
   annulus.rotateX(Math.PI/2)
-  const outer = new Group(); outer.position.y = -.24; scene.add(outer)
+  const outer = new Group(); outer.position.y = stationGeometry.ringY; scene.add(outer)
   mesh(annulus,metal,outer)
   const outerTrack = mesh(geometry(new TorusGeometry(5.19,.025,8,192)),edge,outer)
   outerTrack.position.z = .2
@@ -152,6 +161,70 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
   const rim = mesh(geometry(new SphereGeometry(2.91,64,40)),atmosphere,scene)
   rim.position.copy(core.position)
 
+  // The equatorial mechanism revolves behind a fixed curved nameplate.
+  const equator = new Group(); equator.position.y = .05; equator.rotation.x = .12; scene.add(equator)
+  const equatorRotor = new Group(); equator.add(equatorRotor)
+  const beltProfile = [[5.04,-.34],[5.17,-.46],[5.38,-.46],[5.5,-.33],[5.5,.33],[5.38,.46],[5.17,.46],[5.04,.34],[5.04,-.34]].map(([radius,depth]) => new Vector2(radius,depth))
+  const beltGeometry = geometry(new LatheGeometry(beltProfile,192))
+  const beltUV = beltGeometry.getAttribute('uv')
+  for (let index=0; index<beltUV.count; index++) beltUV.setY(index,(beltProfile[index%beltProfile.length].y+.46)/.92)
+  mesh(beltGeometry,metal,equatorRotor)
+  for (const y of [-.43,.43]) {
+    const trim = mesh(geometry(new TorusGeometry(5.37,.038,8,160)),edge,equatorRotor)
+    trim.rotation.x = Math.PI/2; trim.position.y = y
+    const strip = mesh(geometry(new TorusGeometry(5.38,.014,6,160)),cyan,equatorRotor)
+    strip.rotation.x = Math.PI/2; strip.position.y = y*.88
+  }
+  const beltClamps = new InstancedMesh(geometry(new BoxGeometry(.11,.91,.17)),dark,32)
+  const beltIndicators = new InstancedMesh(geometry(new BoxGeometry(.04,.32,.025)),cyan,32)
+  for (let index=0; index<32; index++) {
+    const angle = index/32*Math.PI*2
+    transform.position.set(Math.sin(angle)*5.51,0,Math.cos(angle)*5.51)
+    transform.rotation.set(0,angle,0); transform.updateMatrix(); beltClamps.setMatrixAt(index,transform.matrix)
+    transform.position.set(Math.sin(angle)*5.61,0,Math.cos(angle)*5.61)
+    transform.updateMatrix(); beltIndicators.setMatrixAt(index,transform.matrix)
+  }
+  equatorRotor.add(beltClamps,beltIndicators)
+  mesh(geometry(new CylinderGeometry(5.64,5.64,.76,64,1,true,-.62,1.24)),dark,equator)
+  for (const x of [-2.92,2.92]) {
+    const lamp = mesh(geometry(new BoxGeometry(.025,.38,.025)),cyan,equator)
+    lamp.position.set(x,0,Math.sqrt(5.66**2-x*x)); lamp.rotation.y = Math.asin(x/5.66)
+  }
+
+  // Both masts are real hardware: rotating collars, engraved stems and tapered sensor spires.
+  const mastProfile = [[.48,0],[.65,.13],[.65,.23],[.48,.3],[.24,.38],[.24,.91],[.37,.96],[.37,1.12],[.2,1.2],[.16,2.1],[.27,2.17],[.27,2.3],[.1,2.38],[.065,3.35],[.025,3.62],[0,3.75]].map(([radius,height]) => new Vector2(radius,height))
+  const mastGeometry = geometry(new LatheGeometry(mastProfile,80))
+  const mastUV = mastGeometry.getAttribute('uv')
+  for (let index=0; index<mastUV.count; index++) mastUV.setY(index,mastProfile[index%mastProfile.length].y/3.75)
+  const needleGeometry = geometry(new CylinderGeometry(.006,.026,1.75,8))
+  const masts = [1,-1].map(direction => {
+    const mounting = new Group(); mounting.position.y = direction*2.72
+    if (direction<0) mounting.rotation.z = Math.PI
+    scene.add(mounting)
+    const rotor = new Group(); mounting.add(rotor)
+    mesh(mastGeometry,metal,rotor)
+    for (const [height,radius] of [[.18,.656],[.98,.378],[1.1,.378],[2.22,.277]]) {
+      const ring = mesh(geometry(new TorusGeometry(radius,.012,6,64)),cyan,rotor)
+      ring.rotation.x = Math.PI/2; ring.position.y = height
+    }
+    for (let index=0; index<4; index++) {
+      const angle = index/4*Math.PI*2
+      const needle = mesh(needleGeometry,edge,rotor)
+      needle.position.set(Math.cos(angle)*.155,2.43+index*.05,Math.sin(angle)*.155)
+    }
+    const collar = new Group(); mounting.add(collar)
+    for (let index=0; index<8; index++) {
+      const angle = index/8*Math.PI*2
+      const rib = mesh(geometry(new BoxGeometry(.06,.26,.09)),edge,collar)
+      rib.position.set(Math.sin(angle)*.67,.18,Math.cos(angle)*.67); rib.rotation.y = angle
+    }
+    for (const [angle,surface] of [[.3,cyan],[2.6,violet]] as const) {
+      const beacon = mesh(geometry(new BoxGeometry(.08,.055,.04)),surface,collar)
+      beacon.position.set(Math.sin(angle)*.715,.18,Math.cos(angle)*.715); beacon.rotation.y = angle
+    }
+    return { rotor, collar }
+  })
+
   const halos = haloTexture(); textures.add(halos)
   const orbiters = [0,1].map(index => {
     const orbit = new Group(); orbit.position.y = -.04
@@ -167,13 +240,17 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
     return carrier
   })
 
+  const dockCollar = geometry(new TorusGeometry(.13,.04,8,24))
+  const dockInsert = geometry(new CylinderGeometry(.088,.088,.18,20))
+  const dockStrut = geometry(new CylinderGeometry(.07,.085,1,8))
   const docks = connectionColors.map(color => {
     const group = new Group(); scene.add(group)
-    const housing = mesh(geometry(new TorusGeometry(.13,.04,8,24)),edge,group)
+    const housing = mesh(dockCollar,edge,group)
     housing.position.z = 1.35
-    const insert = mesh(geometry(new CylinderGeometry(.088,.088,.18,20)),material(new MeshStandardMaterial({ color:'#253b50', metalness:.72, roughness:.24, emissive:new Color(color), emissiveIntensity:.12 })),group)
+    const insert = mesh(dockInsert,material(new MeshStandardMaterial({ color:'#253b50', metalness:.72, roughness:.24, emissive:new Color(color), emissiveIntensity:.12 })),group)
     insert.rotation.x = Math.PI/2; insert.position.z = 1.35
-    return group
+    const strut = mesh(dockStrut,dark,group)
+    return { group, strut, housing, insert }
   })
 
   const motion = matchMedia('(prefers-reduced-motion: reduce)')
@@ -183,24 +260,43 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
   const positionDocks = () => {
     const origin = canvas.getBoundingClientRect()
     if (!origin.width || !origin.height) return
-    docks.forEach((dock,index) => {
+    docks.forEach(({group,strut,housing,insert},index) => {
       const port = canvas.parentElement?.querySelector<HTMLElement>(`[data-station-port="${index}"]`)
-      dock.visible = index < activeCount && !!port
+      group.visible = index < activeCount && !!port
       if (!port) return
       const bounds = port.getBoundingClientRect()
-      dock.position.x = ((bounds.left+bounds.width/2-origin.left)/origin.width-.5)*WORLD_WIDTH
-      dock.position.y = (.5-(bounds.top+bounds.height/2-origin.top)/origin.height)*WORLD_HEIGHT
+      group.position.x = ((bounds.left+bounds.width/2-origin.left)/origin.width-.5)*WORLD_WIDTH
+      group.position.y = (.5-(bounds.top+bounds.height/2-origin.top)/origin.height)*WORLD_HEIGHT
+      // Keep the coupling wider than the 16px tube even on a small station canvas.
+      const fittingScale = (bounds.width+10)/origin.width*WORLD_WIDTH/.34
+      housing.scale.setScalar(fittingScale)
+      insert.scale.setScalar(fittingScale)
+      const dx = group.position.x, dy = group.position.y-core.position.y
+      const radius = Math.hypot(dx,dy)
+      const reach = Math.max(.12,radius-2.68)
+      strut.scale.y = reach
+      strut.position.set(-dx/radius*reach/2,-dy/radius*reach/2,1.27)
+      strut.rotation.z = -Math.atan2(dx,dy)
     })
   }
   const draw = () => {
     outer.rotation.set(Math.sin(elapsed*.23)*.045,.13+Math.sin(elapsed*.19)*.045,elapsed*.105)
     counter.rotation.set(-.035,-.16,-elapsed*.17)
     core.rotation.y = elapsed*.14
+    equator.rotation.x = .12+Math.sin(elapsed*.43)*.012
+    equator.position.y = .05+Math.sin(elapsed*.31)*.025
+    equatorRotor.rotation.y = elapsed*.16
+    masts.forEach(({rotor,collar},index) => {
+      rotor.rotation.y = elapsed*(index ? -.27 : .23)
+      rotor.position.y = Math.sin(elapsed*.6+index*Math.PI)*.035
+      collar.rotation.y = elapsed*(index ? .18 : -.2)
+    })
     orbiters.forEach((orbiter,index) => { orbiter.rotation.z = elapsed*(index ? -.32 : .27)+index*Math.PI })
     blueLight.position.x = -4+Math.sin(elapsed*.3)*.7
     purpleLight.position.y = 1.4+Math.cos(elapsed*.26)*.55
     atmosphere.uniforms.intensity.value = (live ? .42 : .28)+Math.sin(elapsed*.8)*.025
     renderer.render(scene,camera)
+    if (shaderFailed && !disposed) { dispose(); callbacks.onFailure() }
   }
   const tick = (time: number) => {
     frame = requestAnimationFrame(tick)
@@ -230,7 +326,12 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
   const restoreContext = () => {
     contextLost = false
     if (disposed || !ready) return
-    resize(); callbacks.onReady()
+    try {
+      shaderFailed = false
+      environment.dispose(); environment = createEnvironment(); scene.environment = environment.texture
+      resize()
+      if (!disposed) callbacks.onReady()
+    } catch { dispose(); callbacks.onFailure() }
   }
   const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update() })
   const sizing = new ResizeObserver(resize)
@@ -254,13 +355,15 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
     textures.add(texture)
     texture.colorSpace = SRGBColorSpace; texture.wrapS = RepeatWrapping; texture.repeat.x = 2
     texture.anisotropy = Math.min(4,renderer.capabilities.getMaxAnisotropy())
-    metal.map = texture; metal.needsUpdate = true
+    metal.map = texture; metal.bumpMap = texture; metal.bumpScale = .018; metal.needsUpdate = true
     await renderer.compileAsync(scene,camera)
-    if (disposed || contextLost) return
-    ready = true; resize(); callbacks.onReady()
+    if (disposed) return
+    ready = true
+    if (!contextLost) { resize(); if (!disposed) callbacks.onReady() }
   }).catch(() => { if (!disposed) { dispose(); callbacks.onFailure() } })
   return {
     setStatus(nextLive,count) {
+      if (disposed) return
       live = nextLive; activeCount = Math.min(4,Math.max(0,count))
       cyan.color.set(live ? '#59cef2' : '#438caa')
       violet.color.set(live ? '#a895ed' : '#716592')
