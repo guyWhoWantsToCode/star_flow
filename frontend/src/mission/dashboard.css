@@ -1,4 +1,6 @@
 /* Mission Control: measured connections and a physically lit central station. */
+.lunar-orbits.lunar-orbits-mission:has(~ .dashboard-screen){top:48px}
+@media(max-width:760px){.lunar-orbits.lunar-orbits-mission:has(~ .dashboard-screen){top:100px}}
 .dashboard-screen{width:min(1580px,calc(100% - 64px));position:relative;isolation:isolate}
 .dashboard-screen .mission-header{margin-bottom:12px;min-height:100px;border:0}
 .dashboard-screen .mission-identity{flex-shrink:0}
