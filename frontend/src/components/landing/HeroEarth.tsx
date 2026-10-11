@@ -45,6 +45,7 @@ export default function HeroEarth() {
         color*=.12+.88*light;
         float rim=pow(1.0-n.z,3.0);
         color+=vec3(.08,.3,.65)*rim*(.3+.7*light);
+        color*=1.08;
         gl_FragColor=vec4(color,1.0-smoothstep(.995,1.0,r));
       }`))
     gl.linkProgram(program)
@@ -68,7 +69,7 @@ export default function HeroEarth() {
     let frame=0, angle=.15, previous=0, visible=true, ready=false, disposed=false
     const draw = () => { gl.uniform1f(rotation,angle); gl.drawArrays(gl.TRIANGLES,0,6) }
     const tick = (time: number) => {
-      if(previous) angle+=Math.min(time-previous,100)/180000
+      if(previous) angle+=Math.min(time-previous,100)/90000
       previous=time; draw(); frame=requestAnimationFrame(tick)
     }
     const update = () => {
