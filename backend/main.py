@@ -52,7 +52,6 @@ async def set_rogue(on: bool, agent: str = "tagger"):
     state.ROGUE = agent
     state.log("warn", f"{agent} went rogue")
     return {"rogue": agent}
-
 @app.post("/agents")
 async def set_agents(ids: str, shares: str):
     id_list = [s.strip() for s in ids.split(",")]
