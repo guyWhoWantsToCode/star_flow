@@ -1,9 +1,9 @@
 import { AgentIcon } from './AgentIcon'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Brand, OrbitLogo } from '../components/landing/Brand'
 import { agentStyle } from './agents'
 import { readCatalog, splitAgentShares, type AgentId, type Connection } from '../services/starflowApi'
-export default function AgentSelection({ status, error, initializing, onPower, onRetry, onReset }: {
+function AgentSelection({ status, error, initializing, onPower, onRetry, onReset }: {
   status: Connection; error: string; initializing: boolean; onPower: (ids: AgentId[]) => void; onRetry: () => void; onReset: () => void
 }) {
   const [catalog, setCatalog] = useState<{id: string; name: string}[]>([])
@@ -46,3 +46,5 @@ export default function AgentSelection({ status, error, initializing, onPower, o
     <p className="setup-note">Shares protect request capacity. Gemini generates each selected service’s response.</p><a href="/" className="text-link">← Return to overview</a>
   </main></div>
 }
+
+export default memo(AgentSelection)

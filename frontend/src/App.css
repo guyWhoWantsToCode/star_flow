@@ -1193,3 +1193,73 @@ a.button[href='/setup']:focus-visible::before { opacity: 1; }
   #how-it-works .flow-merge::after,
   #how-it-works .flow-output > span::after { opacity: 0; }
 }
+
+/* Architecture-only lighting refinements; all geometry remains unchanged. */
+#how-it-works .flow-merge g:nth-child(1) > path {
+  animation-duration: 3.2s;
+  animation-delay: -.35s;
+}
+#how-it-works .flow-merge g:nth-child(2) > path {
+  animation-duration: 3.8s;
+  animation-delay: -1.1s;
+}
+#how-it-works .flow-merge g:nth-child(3) > path {
+  animation-duration: 4.2s;
+  animation-delay: -2.15s;
+}
+#how-it-works .flow-merge g:nth-child(4) > path {
+  animation-duration: 3.5s;
+  animation-delay: -1.65s;
+}
+/* Existing SVG motion still follows the exact curved connector paths. */
+#how-it-works .request {
+  animation: architecture-packet-light 3.6s ease-in-out infinite;
+}
+#how-it-works .request-1 { animation-delay: -.85s; }
+#how-it-works .request-2 { animation-delay: -1.8s; }
+#how-it-works .request-3 { animation-delay: -2.6s; }
+#how-it-works .flow-output i { container-type: inline-size; }
+#how-it-works .flow-output i::before {
+  width: 5px;
+  animation: architecture-output-glide 3.4s ease-in-out infinite;
+}
+#how-it-works .destination {
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(111, 175, 223, .35);
+  box-shadow: inset 0 0 18px rgba(122, 195, 227, .035), 0 0 25px rgba(56, 189, 248, .08);
+}
+#how-it-works .destination::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  border-radius: 20px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(98, 133, 228, .09), transparent 72%);
+}
+#how-it-works .destination > svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: architecture-gemini-breathe 5.8s ease-in-out infinite;
+}
+@keyframes architecture-packet-light {
+  0%, 100% { opacity: .65; }
+  45%, 65% { opacity: 1; }
+}
+@keyframes architecture-output-glide {
+  0% { transform: translateX(0); opacity: 0; }
+  12%, 85% { opacity: 1; }
+  100% { transform: translateX(calc(100cqw - 5px)); opacity: 0; }
+}
+@keyframes architecture-gemini-breathe {
+  0%, 100% { transform: scale(1); opacity: .8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Opaque panel fills provide depth without re-blurring the moving galaxy each frame. */
+#how-it-works .system-panel,
+#capabilities .capability-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

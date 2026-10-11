@@ -8,7 +8,10 @@ function randomSource(seed: number) {
   }
 }
 
+const textureCache = new Map<boolean, HTMLCanvasElement>()
 function makeGalaxy(mobile: boolean) {
+  const cached = textureCache.get(mobile)
+  if (cached) return cached
   const texture = document.createElement('canvas')
   const size = mobile ? 1500 : 2800
   texture.width = texture.height = size
@@ -69,6 +72,7 @@ function makeGalaxy(mobile: boolean) {
   core.addColorStop(1, 'rgba(149,121,204,0)')
   context.fillStyle = core
   context.fillRect(0, 0, size, size)
+  textureCache.set(mobile, texture)
   return texture
 }
 
@@ -88,6 +92,7 @@ function GalaxyBackground() {
     let frame = 0
     let lastTime = 0
     let inView = true
+    let starLayers: { path: Path2D; opacity: number }[] = []
     const random = randomSource(9127)
     const distantStars = Array.from({ length: 65 }, () => {
       return { x: random(), y: random(), size: 0.4 + random() * 0.7, opacity: 0.1 + random() * 0.3 }
@@ -96,11 +101,9 @@ function GalaxyBackground() {
     function draw() {
       if (!context || !texture) return
       context.clearRect(0, 0, width, height)
-      for (const star of distantStars) {
-        context.fillStyle = `rgba(190,205,232,${star.opacity})`
-        context.beginPath()
-        context.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2)
-        context.fill()
+      for (const layer of starLayers) {
+        context.fillStyle = `rgba(190,205,232,${layer.opacity})`
+        context.fill(layer.path)
       }
       const diameter = mobile ? width * 1.65 : Math.min(width * 0.86, 1500)
       context.save()
@@ -118,7 +121,7 @@ function GalaxyBackground() {
       frame = 0
       if (motion.matches || !inView || document.hidden) return
       if (!lastTime) lastTime = time
-      if (time - lastTime >= 1000 / (mobile ? 30 : 60)) {
+      if (time - lastTime >= 1000 / (mobile ? 30 : 60) - 0.75) {
         angle += Math.min((time - lastTime) / 1000, 0.1) * 0.075
         lastTime = time
         draw()
@@ -135,8 +138,15 @@ function GalaxyBackground() {
 
     function resize() {
       const bounds = canvas.getBoundingClientRect()
+      if (texture && width === bounds.width && height === bounds.height && canvas.width === Math.round(bounds.width * Math.min(window.devicePixelRatio || 1, 2))) return
       width = bounds.width
       height = bounds.height
+      starLayers = Array.from({ length: 4 }, (_, index) => ({ path: new Path2D(), opacity: .1 + index * .1 }))
+      for (const star of distantStars) {
+        const layer = starLayers[Math.min(3, Math.round((star.opacity - .1) / .1))]
+        layer.path.moveTo(star.x * width + star.size, star.y * height)
+        layer.path.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2)
+      }
       const nextMobile = width < 760
       if (!texture || mobile !== nextMobile) {
         mobile = nextMobile

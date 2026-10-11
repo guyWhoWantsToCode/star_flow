@@ -1,7 +1,10 @@
+import { memo } from 'react'
 import Navbar from './Navbar'
 import HeroSection from './HeroSection'
 import SystemVisualization from './SystemVisualization'
 import CapabilitiesSection from './CapabilitiesSection'
 import FinalCTA from './FinalCTA'
 import Footer from './Footer'
-export default function LandingPage() { return <><a className="skip-link" href="#main">Skip to content</a><Navbar/><main id="main"><HeroSection/><SystemVisualization/><CapabilitiesSection/><FinalCTA/></main><Footer/></> }
+function LandingPage() { return <><a className="skip-link" href="#main">Skip to content</a><Navbar/><main id="main"><HeroSection/><SystemVisualization/><CapabilitiesSection/><FinalCTA/></main><Footer/></> }
+
+export default memo(LandingPage)
