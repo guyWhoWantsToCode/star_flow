@@ -3,7 +3,7 @@ import time
 START = time.time()
 LIMIT = 10
 
-ROGUE = False
+ROGUE = None
 
 CATALOG = {
     "chatbot": "Customer chatbot", "triage": "Support triage", "search": "Doc search",
@@ -31,6 +31,7 @@ def log(level, text):
     del EVENTS[20:]
 
 def set_agents(ids, shares):
+    global ROGUE
     AGENTS.clear()
     LAST.clear()
     RATES.clear()
@@ -38,6 +39,8 @@ def set_agents(ids, shares):
         AGENTS[aid] = {"share": shares[i], "tried": 0, "released": 0, "rejected": 0}
         LAST[aid] = dict(AGENTS[aid])
         RATES[aid] = {"tried": 0, "released": 0, "rejected": 0}
+    if ROGUE not in AGENTS:
+        ROGUE = None
     log("info", f"agents set to {', '.join(ids)}")
 
 def tick_rates():
@@ -51,6 +54,7 @@ def snapshot():
     return {
         "t": int(time.time() - START),
         "limit": LIMIT,
+        "rogue": ROGUE,
         "agents": [
             {"id": k, "name": CATALOG.get(k, k), **v, "rate": RATES[k]}
             for k, v in AGENTS.items()

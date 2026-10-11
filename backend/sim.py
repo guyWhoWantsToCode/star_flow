@@ -18,16 +18,14 @@ async def main():
         while True:
             try:
                 snap = (await client.get(f"{BASE}/snapshot")).json()
-                rogue = (await client.get(f"{BASE}/rogue")).json()["rogue"]
             except Exception:
                 await asyncio.sleep(1)
                 continue
 
-            agents = snap["agents"]
-            last = agents[-1]["id"]
+            rogue = snap.get("rogue")
 
-            for a in agents:
-                rate = ROGUE_RATE if (a["id"] == last and rogue) else a["share"]
+            for a in snap["agents"]:
+                rate = ROGUE_RATE if a["id"] == rogue else a["share"]
                 for _ in range(rate):
                     asyncio.create_task(fire(client, a["id"], sem))
 
