@@ -45,7 +45,7 @@ export default function HeroEarth() {
         color*=.12+.88*light;
         float rim=pow(1.0-n.z,3.0);
         color+=vec3(.08,.3,.65)*rim*(.3+.7*light);
-        color*=1.08;
+        color*=1.25;
         gl_FragColor=vec4(color,1.0-smoothstep(.995,1.0,r));
       }`))
     gl.linkProgram(program)
