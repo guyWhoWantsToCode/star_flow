@@ -41,9 +41,17 @@ async def set_rogue(on: bool):
     state.log("warn" if on else "info", f"rogue {'ON' if on else 'OFF'}")
     return {"rogue": on}
 
-@app.get("/rogue")
-async def get_rogue():
-    return {"rogue": state.ROGUE}
+@app.post("/rogue")
+async def set_rogue(on: bool, agent: str = "tagger"):
+    if not on:
+        state.ROGUE = None
+        state.log("info", "rogue OFF")
+        return {"rogue": None}
+    if agent not in state.AGENTS:
+        return {"ok": False, "error": f"unknown agent: {agent}"}
+    state.ROGUE = agent
+    state.log("warn", f"{agent} went rogue")
+    return {"rogue": agent}
 
 @app.post("/agents")
 async def set_agents(ids: str, shares: str):
