@@ -36,12 +36,6 @@ async def ask(agent: str, text: str = "hello", real: bool = False):
     return {"ok": True, "answer": answer}
 
 @app.post("/rogue")
-async def set_rogue(on: bool):
-    state.ROGUE = on
-    state.log("warn" if on else "info", f"rogue {'ON' if on else 'OFF'}")
-    return {"rogue": on}
-
-@app.post("/rogue")
 async def set_rogue(on: bool, agent: str = "tagger"):
     if not on:
         state.ROGUE = None
@@ -52,6 +46,11 @@ async def set_rogue(on: bool, agent: str = "tagger"):
     state.ROGUE = agent
     state.log("warn", f"{agent} went rogue")
     return {"rogue": agent}
+
+@app.get("/rogue")
+async def get_rogue():
+    return {"rogue": state.ROGUE}
+
 @app.post("/agents")
 async def set_agents(ids: str, shares: str):
     id_list = [s.strip() for s in ids.split(",")]
