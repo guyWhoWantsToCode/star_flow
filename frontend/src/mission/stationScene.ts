@@ -48,7 +48,7 @@ function haloTexture() {
 }
 
 export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbacks): StationScene {
-  const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' })
+  const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' })
   renderer.setClearColor(0x000000,0)
   renderer.outputColorSpace = SRGBColorSpace
   renderer.toneMapping = ACESFilmicToneMapping
@@ -254,6 +254,14 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
   })
 
   const motion = matchMedia('(prefers-reduced-motion: reduce)')
+  // Stationary hardware inherits its parent's motion; its local matrix never changes.
+  const movingMeshes = new Set<Object3D>([core, ...docks.flatMap(dock => [dock.strut, dock.housing, dock.insert])])
+  scene.traverse(object => {
+    if (object instanceof Mesh && !movingMeshes.has(object)) {
+      object.updateMatrix()
+      object.matrixAutoUpdate = false
+    }
+  })
   const compact = matchMedia('(max-width:760px)')
   let frame = 0, lastTime = 0, lastDraw = 0, elapsed = 0
   let ready = false, visible = false, disposed = false, contextLost = false, live = false, activeCount = 3
@@ -317,8 +325,11 @@ export function createStationScene(canvas: HTMLCanvasElement, callbacks: Callbac
     if (disposed || contextLost) return
     const width = canvas.clientWidth, height = canvas.clientHeight
     if (!width || !height) return
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1,compact.matches ? 1.35 : 1.65,1100/width))
-    renderer.setSize(width,height,false)
+    const ratio = Math.min(devicePixelRatio||1,compact.matches ? 1.35 : 1.65,1100/width)
+    if (renderer.getPixelRatio() !== ratio || canvas.width !== Math.floor(width*ratio) || canvas.height !== Math.floor(height*ratio)) {
+      renderer.setPixelRatio(ratio)
+      renderer.setSize(width,height,false)
+    }
     positionDocks(); update()
   }
   const loseContext = (event: Event) => {

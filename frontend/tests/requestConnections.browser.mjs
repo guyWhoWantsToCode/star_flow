@@ -103,14 +103,15 @@ try {
     assert.ok(delayedTextures.length,'station texture request is held for the loading regression')
     const loading = () => evaluate(`(() => {
       const stage=document.querySelector('.station-stage'), bounds=stage.getBoundingClientRect()
-      return {renderer:stage.dataset.renderer,busy:stage.getAttribute('aria-busy'),legacy:stage.querySelectorAll('.station-render').length,loading:stage.querySelectorAll('.station-loading i').length,width:bounds.width,height:bounds.height,canvasOpacity:getComputedStyle(stage.querySelector('canvas')).opacity}
+      return {renderer:stage.dataset.renderer,busy:stage.getAttribute('aria-busy'),legacy:stage.querySelectorAll('.station-render').length,preview:stage.querySelector('.station-render')?.getAttribute('src'),loading:stage.querySelectorAll('.station-loading i').length,width:bounds.width,height:bounds.height,canvasOpacity:getComputedStyle(stage.querySelector('canvas')).opacity}
     })()`)
     const before = await loading(); await pause(500); const during = await loading()
     assert.equal(during.renderer,'loading')
     assert.equal(during.busy,'true')
-    assert.equal(during.legacy,0,'the old station image is absent during initialization')
+    assert.equal(during.legacy,1,'the current station preview fills the loading gap')
+    assert.equal(during.preview,'/images/mission-station-current.png','the preview uses the current model')
     assert.equal(during.canvasOpacity,'0','an unfinished WebGL frame stays hidden')
-    assert.equal(during.loading,3)
+    assert.equal(during.loading,0)
     assert.ok(Math.abs(before.width-during.width)<.25); assert.ok(Math.abs(before.height-during.height)<.25)
     for (const requestId of delayedTextures) await send('Fetch.continueRequest',{requestId})
     await send('Fetch.disable')

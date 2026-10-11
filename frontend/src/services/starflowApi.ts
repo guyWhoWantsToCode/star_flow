@@ -23,9 +23,8 @@ export function parseSnapshot(value: unknown): Snapshot {
 }
 
 export function waiting(agent: AgentSnapshot) { return Math.max(0, agent.tried - agent.released - agent.rejected) }
-export const apiBase = import.meta.env?.DEV ? '/starflow-api' : 'https://starflow-production-7ca6.up.railway.app'
+export const apiBase = 'https://starflow-production-7ca6.up.railway.app'
 export function socketUrl() {
-  if (import.meta.env?.DEV) return `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/starflow-api/ws`
   return 'wss://starflow-production-7ca6.up.railway.app/ws'
 }
 async function request(path: string, method = 'GET', signal?: AbortSignal): Promise<Record<string, unknown>> {

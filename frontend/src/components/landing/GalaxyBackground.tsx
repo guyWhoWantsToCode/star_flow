@@ -94,6 +94,8 @@ function GalaxyBackground() {
     let lastDraw = 0
     let inView = true
     let starLayers: { path: Path2D; opacity: number }[] = []
+    const ambient = document.createElement('canvas')
+    const ambientContext = ambient.getContext('2d')!
     const random = randomSource(9127)
     const distantStars = Array.from({ length: 65 }, () => {
       return { x: random(), y: random(), size: 0.4 + random() * 0.7, opacity: 0.1 + random() * 0.3 }
@@ -102,10 +104,7 @@ function GalaxyBackground() {
     function draw() {
       if (!context || !texture) return
       context.clearRect(0, 0, width, height)
-      for (const layer of starLayers) {
-        context.fillStyle = `rgba(190,205,232,${layer.opacity})`
-        context.fill(layer.path)
-      }
+      context.drawImage(ambient, 0, 0, width, height)
       const diameter = mobile ? width * 1.65 : Math.min(width * 0.86, 1500)
       context.save()
       context.translate(width * (mobile ? 0.76 : 0.7), height * (mobile ? 0.5 : 0.55))
@@ -157,6 +156,13 @@ function GalaxyBackground() {
         texture = makeGalaxy(mobile)
       }
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+      ambient.width = Math.round(width * pixelRatio)
+      ambient.height = Math.round(height * pixelRatio)
+      ambientContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+      for (const layer of starLayers) {
+        ambientContext.fillStyle = `rgba(190,205,232,${layer.opacity})`
+        ambientContext.fill(layer.path)
+      }
       canvas.width = Math.round(width * pixelRatio)
       canvas.height = Math.round(height * pixelRatio)
       context!.imageSmoothingEnabled = true
