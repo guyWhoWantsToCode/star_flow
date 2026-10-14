@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, logging, os
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -6,16 +6,36 @@ import state
 import scheduler
 import gemini
 import db
+import demo
+
+RETENTION_HOURS = int(os.environ.get("METRICS_RETENTION_HOURS", "24"))
+
+async def prune_loop():
+    while True:
+        try:
+            db.prune(RETENTION_HOURS)
+        except Exception:
+            logging.getLogger("starflow.db").exception("metrics prune failed")
+        await asyncio.sleep(600)
 
 @asynccontextmanager
 async def lifespan(app):
     scheduler.rebuild_queues()
     task = asyncio.create_task(scheduler.run())
+    prune_task = asyncio.create_task(prune_loop())
+    demo_task = asyncio.create_task(demo.run(ask)) if demo.ENABLED else None
     yield
     task.cancel()
+    prune_task.cancel()
+    if demo_task:
+        demo_task.cancel()
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+@app.get("/health")
+async def health():
+    return {"ok": True}
 
 @app.websocket("/ws")
 async def ws(sock: WebSocket):
@@ -25,11 +45,13 @@ async def ws(sock: WebSocket):
         await asyncio.sleep(0.5)
 
 @app.get("/ask")
-async def ask(agent: str, text: str = "hello", real: bool = False):
+async def ask(agent: str, text: str = "hello", real: bool = False, stub: bool = False):
     try:
         await scheduler.submit(agent)
     except RuntimeError as e:
         return {"ok": False, "error": str(e)}
+    if stub:
+        return {"ok": True, "answer": await gemini.stub(agent, text)}
     if not real:
         return {"ok": True}
     answer = await gemini.ask(agent, text)

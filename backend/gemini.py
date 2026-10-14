@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, random
 from google import genai
 from dotenv import load_dotenv
 
@@ -9,7 +9,15 @@ JOBS = {
     "chatbot":    "You are a customer support agent. Answer in two sentences: ",
     "summarizer": "Summarize this in one sentence: ",
     "tagger":     "Reply with one category word for this text: ",
+    "triage":     "Classify this support ticket as billing, bug, or how-to in one word: ",
+    "search":     "Rewrite this as a concise search query: ",
+    "rerank":     "Reply with a relevance score from 1 to 10 for this text: ",
 }
+
+async def stub(agent, text):
+    """Demo downstream: realistic Gemini latency, canned answer, no API call."""
+    await asyncio.sleep(random.uniform(0.4, 1.2))
+    return "[demo] canned response"
 
 async def ask(agent, text):
     prompt = JOBS.get(agent, "Reply in one short sentence: ") + text

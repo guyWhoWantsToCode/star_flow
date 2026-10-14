@@ -10,6 +10,7 @@
 .mission-indicators>span{white-space:nowrap}
 .connection-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #314054;border-radius:5px;text-transform:capitalize;color:#a0afc3}
 .connection-pill i{width:6px;height:6px;border-radius:50%;background:#8192a5}
+.connection-pill.is-down{color:#ff8a96;border-color:#ff647466;background:#ff647412}.connection-pill.is-down i{background:#ff6474}
 .connection-pill.is-live{color:#9adfc6;border-color:#35d69a38;background:#35d69a09}.connection-pill.is-live i{background:#35d69a}
 .mission-text-button{background:none;border:0;color:#a8c9e2;padding:8px 0;font-size:12px}.mission-text-button:hover{color:#fff}
 .dashboard-intro{display:flex;justify-content:space-between;align-items:flex-end;padding:38px 0 10px;gap:24px}.dashboard-intro>p{color:#879bb2;font-size:12px;line-height:1.8}

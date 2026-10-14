@@ -16,9 +16,10 @@ CATALOG = {
 }
 
 AGENTS = {
-    "chatbot":    {"share": 5, "tried": 0, "released": 0, "rejected": 0},
-    "summarizer": {"share": 3, "tried": 0, "released": 0, "rejected": 0},
-    "tagger":     {"share": 2, "tried": 0, "released": 0, "rejected": 0},
+    "chatbot": {"share": 3, "tried": 0, "released": 0, "rejected": 0},
+    "triage":  {"share": 3, "tried": 0, "released": 0, "rejected": 0},
+    "search":  {"share": 2, "tried": 0, "released": 0, "rejected": 0},
+    "rerank":  {"share": 2, "tried": 0, "released": 0, "rejected": 0},
 }
 
 LAST = {name: dict(a) for name, a in AGENTS.items()}
